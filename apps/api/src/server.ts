@@ -22,6 +22,7 @@ const app = createApp({
   businessId: config.BUSINESS_ID,
   origins: config.WEB_ORIGINS.split(',').map((origin) => origin.trim()),
   logLevel: config.LOG_LEVEL,
+  trustProxyHops: config.TRUST_PROXY_HOPS,
   payments:
     config.STRIPE_SECRET_KEY && config.STRIPE_WEBHOOK_SECRET && config.CHECKOUT_RETURN_ORIGIN
       ? {

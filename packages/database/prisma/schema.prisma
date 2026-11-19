@@ -146,6 +146,7 @@ model InventoryBalance {
   movements InventoryMovement[]
   reservations StockReservation[]
   @@unique([warehouseId, sku])
+  @@index([sku], map: "inventory_balances_sku_idx")
   @@map("inventory_balances")
 }
 

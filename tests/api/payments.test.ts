@@ -1,6 +1,7 @@
 import { beforeEach, afterAll, describe, it, expect } from 'vitest'
 import supertest from 'supertest'
 import { randomUUID, createHmac } from 'node:crypto'
+import { createServer, createConnection, type Socket } from 'node:net'
 import { config } from 'dotenv'
 import { createDatabase } from '@docklane/database'
 import {
@@ -441,6 +442,178 @@ describe('Phase 5 payments and background recovery on PostgreSQL', () => {
       await resumed.close()
     }
   })
+  it.each(['completion', 'failure'] as const)(
+    'keeps a replacement lease authoritative after a delayed old worker %s',
+    async (outcome) => {
+      const order = await reserve()
+      const session = (await checkout(order.id)).body.data.sessionId
+      const payment = await db.payment.findUniqueOrThrow({ where: { orderId: order.id } })
+      const event = await db.outboxEvent.findFirstOrThrow({
+        where: { type: 'STRIPE_RECONCILE', payload: { path: ['paymentId'], equals: payment.id } },
+      })
+      await db.outboxEvent.update({ where: { id: event.id }, data: { availableAt: new Date() } })
+      let release!: () => void,
+        started!: () => void,
+        held = false
+      const gate = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      const entered = new Promise<void>((resolve) => {
+        started = resolve
+      })
+      const original = provider.session.bind(provider)
+      provider.session = async (id) => {
+        const snapshot = await original(id)
+        if (!held) {
+          held = true
+          started()
+          await gate
+          if (outcome === 'failure') throw new ProviderError('CONNECTION_LOST')
+        }
+        return snapshot
+      }
+      const oldWork = processOutboxEvent(db, businessId, event.id, provider).catch(
+        (error: unknown) => error,
+      )
+      try {
+        await entered
+        const oldLease = (await db.outboxEvent.findUniqueOrThrow({ where: { id: event.id } }))
+          .leaseToken
+        await db.outboxEvent.update({
+          where: { id: event.id },
+          data: { lockedAt: new Date(Date.now() - 100_000) },
+        })
+        provider.pay(session)
+        expect(await processOutboxEvent(db, businessId, event.id, provider)).toBe(true)
+        const completed = await db.outboxEvent.findUniqueOrThrow({ where: { id: event.id } })
+        expect(completed).toMatchObject({
+          status: 'COMPLETED',
+          attempts: 2,
+          leaseToken: null,
+          lastErrorCode: null,
+        })
+        expect(oldLease).not.toBeNull()
+        release()
+        const result = await oldWork
+        if (outcome === 'failure') expect(result).toBeInstanceOf(ProviderError)
+        expect(await db.outboxEvent.findUniqueOrThrow({ where: { id: event.id } })).toEqual(
+          completed,
+        )
+        expect((await db.order.findUniqueOrThrow({ where: { id: order.id } })).paymentStatus).toBe(
+          'CAPTURED',
+        )
+        expect(
+          await db.auditEvent.count({ where: { entityId: order.id, action: 'PAYMENT_CONFIRMED' } }),
+        ).toBe(1)
+      } finally {
+        release()
+        await oldWork
+        provider.session = original
+      }
+    },
+  )
+  it('continues late-payment refunds during a queue disconnect and reconnects the same worker without duplicate movements', async () => {
+    const redis = new URL(process.env.REDIS_URL ?? 'redis://127.0.0.1:56379')
+    if (redis.protocol !== 'redis:' || !['localhost', '127.0.0.1'].includes(redis.hostname))
+      throw new Error('Queue recovery checks require loopback Redis.')
+    let online = true,
+      accepted = 0
+    const sockets = new Set<Socket>(),
+      codes: string[] = []
+    const proxy = createServer((client) => {
+      if (!online) {
+        client.destroy()
+        return
+      }
+      accepted++
+      const upstream = createConnection({ host: redis.hostname, port: Number(redis.port || 6379) })
+      for (const socket of [client, upstream]) {
+        sockets.add(socket)
+        socket.on('error', () => {
+          client.destroy()
+          upstream.destroy()
+        })
+        socket.on('close', () => {
+          sockets.delete(socket)
+          client.destroy()
+          upstream.destroy()
+        })
+      }
+      client.pipe(upstream)
+      upstream.pipe(client)
+    })
+    await new Promise<void>((resolve) => proxy.listen(0, '127.0.0.1', resolve))
+    const address = proxy.address()
+    if (!address || typeof address === 'string')
+      throw new Error('Private Redis proxy did not start.')
+    redis.hostname = '127.0.0.1'
+    redis.port = String(address.port)
+    const first = await reserve(),
+      firstSession = (await checkout(first.id)).body.data.sessionId
+    provider.pay(firstSession)
+    await receiveStripeEvent(db, businessId, signedEvent(firstSession).event)
+    const runtime = createWorkerRuntime(db, {
+      businessId,
+      queueNamespace: `phase8-${randomUUID()}`,
+      redisUrl: redis.toString(),
+      provider,
+      intervalMs: 200,
+      onError: (code) => codes.push(code),
+    })
+    try {
+      await expect
+        .poll(
+          async () => (await db.order.findUniqueOrThrow({ where: { id: first.id } })).paymentStatus,
+          { timeout: 10_000 },
+        )
+        .toBe('CAPTURED')
+      online = false
+      for (const socket of sockets) socket.destroy()
+      const late = await reserve(),
+        lateSession = (await checkout(late.id)).body.data.sessionId
+      provider.pay(lateSession)
+      await elapsed(late.id)
+      await receiveStripeEvent(db, businessId, signedEvent(lateSession).event)
+      await expect
+        .poll(
+          async () => (await db.order.findUniqueOrThrow({ where: { id: late.id } })).paymentStatus,
+          { timeout: 15_000 },
+        )
+        .toBe('REFUNDED')
+      expect(codes).toContain('QUEUE_UNAVAILABLE')
+      expect(provider.refundKeys.size).toBe(1)
+      expect(
+        await db.inventoryMovement.count({ where: { orderId: late.id, type: 'RELEASE' } }),
+      ).toBe(2)
+      const connectionsBefore = accepted
+      online = true
+      const recovered = await reserve(),
+        recoveredSession = (await checkout(recovered.id)).body.data.sessionId
+      provider.pay(recoveredSession)
+      await receiveStripeEvent(db, businessId, signedEvent(recoveredSession).event)
+      await expect
+        .poll(
+          async () =>
+            (await db.order.findUniqueOrThrow({ where: { id: recovered.id } })).paymentStatus,
+          { timeout: 10_000 },
+        )
+        .toBe('CAPTURED')
+      expect(accepted).toBeGreaterThan(connectionsBefore)
+      expect(
+        await db.auditEvent.count({
+          where: { entityId: recovered.id, action: 'PAYMENT_CONFIRMED' },
+        }),
+      ).toBe(1)
+      const mismatches = await db.$queryRaw<
+        { id: string }[]
+      >`SELECT b.id FROM inventory_balances b LEFT JOIN inventory_movements m ON m."balanceId"=b.id GROUP BY b.id HAVING b."onHand"<>COALESCE(SUM(m."deltaOnHand"),0) OR b.reserved<>COALESCE(SUM(m."deltaReserved"),0)`
+      expect(mismatches).toEqual([])
+    } finally {
+      await runtime.close()
+      for (const socket of sockets) socket.destroy()
+      await new Promise<void>((resolve) => proxy.close(() => resolve()))
+    }
+  }, 40_000)
   it('rolls back allocation and confirmation together when the audit insert fails', async () => {
     const order = await reserve(),
       session = (await checkout(order.id)).body.data.sessionId,

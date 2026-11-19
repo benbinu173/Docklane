@@ -1,6 +1,6 @@
 # Docklane checkout concurrency proof
 
-Verified: 2026-11-18T10:33:27.451Z.
+Verified: 2026-11-19T11:04:07.755Z.
 
 | Measurement                             | Result  |
 | --------------------------------------- | ------- |
@@ -14,7 +14,7 @@ Verified: 2026-11-18T10:33:27.451Z.
 | Available units after requests          | 0       |
 | Reservation movements                   | 10      |
 | Unique order IDs                        | 10      |
-| Request batch elapsed time              | 1184 ms |
+| Request batch elapsed time              | 2244 ms |
 
 Environment: Node v22.16.0; PostgreSQL 17.12 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit; Windows loopback; application pool limited to 10 connections.
 

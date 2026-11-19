@@ -1,7 +1,6 @@
 import express, { type Request, type Response, type NextFunction } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
-import { rateLimit } from 'express-rate-limit'
 import { pinoHttp } from 'pino-http'
 import { randomUUID } from 'node:crypto'
 import { z, ZodError } from 'zod'
@@ -30,6 +29,7 @@ import { createResourcesRouter } from './resources.js'
 import { paymentRoutes, stripeWebhook, type PaymentDependencies } from './payments.js'
 import { createOperationsRouter, createdDates, queueWhere } from './operations.js'
 import { fulfillmentRoutes } from './fulfillment.js'
+import { requestLimits, requireJson, type RequestLimits } from './security.js'
 
 declare global {
   // Express request augmentation requires its global namespace.
@@ -48,6 +48,8 @@ export interface AppDependencies {
   origins: string[]
   logLevel?: string
   payments?: PaymentDependencies
+  limits?: RequestLimits
+  trustProxyHops?: number
 }
 const profileSelect = {
   id: true,
@@ -57,6 +59,37 @@ const profileSelect = {
   active: true,
   businessId: true,
 } as const
+async function resolveProfile(
+  db: PrismaClient,
+  businessId: string,
+  identity: Awaited<ReturnType<IdentityVerifier>>,
+) {
+  const existing = await db.userProfile.findUnique({
+    where: { authSubject: identity.subject },
+    select: profileSelect,
+  })
+  if (existing) return existing
+  try {
+    return await db.userProfile.create({
+      data: {
+        authSubject: identity.subject,
+        name: identity.name,
+        email: identity.email,
+        businessId,
+      },
+      select: profileSelect,
+    })
+  } catch (error) {
+    // Concurrent first requests can both observe no profile. The unique subject
+    // chooses one creator; the other request reads that same application role.
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002')
+      throw error
+    return db.userProfile.findUniqueOrThrow({
+      where: { authSubject: identity.subject },
+      select: profileSelect,
+    })
+  }
+}
 function sendError(
   request: Request,
   response: Response,
@@ -78,9 +111,13 @@ export function createApp({
   origins,
   logLevel = 'info',
   payments,
+  limits,
+  trustProxyHops = 0,
 }: AppDependencies) {
   const app = express()
+  const rate = requestLimits(limits)
   app.disable('x-powered-by')
+  app.set('trust proxy', trustProxyHops)
   app.use((request, response, next) => {
     request.requestId = randomUUID()
     response.setHeader('X-Request-Id', request.requestId)
@@ -122,7 +159,17 @@ export function createApp({
       exposedHeaders: ['X-Request-Id'],
     }),
   )
+  app.post('/api/v1/webhooks/stripe', rate.webhooks)
   app.use(stripeWebhook(db, businessId, payments))
+  app.use('/api/v1', rate.all)
+  app.use('/api/v1', (request, _response, next) => {
+    try {
+      requireJson(request)
+      next()
+    } catch (error) {
+      next(error)
+    }
+  })
   app.use(express.json({ limit: '32kb' }))
   app.get('/health/live', (_request, response) => response.json({ status: 'ok' }))
   app.get('/health/ready', async (_request, response) => {
@@ -133,41 +180,14 @@ export function createApp({
       throw new DomainError('SERVICE_UNAVAILABLE', 'The database is temporarily unavailable.', 503)
     }
   })
-  app.use(
-    '/api/v1',
-    rateLimit({
-      windowMs: 60_000,
-      limit: 200,
-      standardHeaders: 'draft-8',
-      legacyHeaders: false,
-      handler: (request, response) =>
-        sendError(
-          request,
-          response,
-          429,
-          'RATE_LIMITED',
-          'Too many requests. Try again in a moment.',
-        ),
-    }),
-  )
-  app.use('/api/v1', async (request, _response, next) => {
+  app.use('/api/v1', rate.authentication, async (request, _response, next) => {
     try {
       const bearer = request.headers.authorization?.match(/^Bearer ([^\s]+)$/i)?.[1]
       const sessionToken = request.get('X-Docklane-Session')
       if (!bearer || bearer.length > 8192 || !sessionToken || sessionToken.length > 2048)
         throw new DomainError('UNAUTHORIZED', 'Sign in to continue.', 401)
       const identity = await verifyIdentity(bearer, sessionToken)
-      const profile = await db.userProfile.upsert({
-        where: { authSubject: identity.subject },
-        create: {
-          authSubject: identity.subject,
-          name: identity.name,
-          email: identity.email,
-          businessId,
-        },
-        update: {},
-        select: profileSelect,
-      })
+      const profile = await resolveProfile(db, businessId, identity)
       if (!profile.active)
         throw new DomainError(
           'ACCOUNT_DISABLED',
@@ -179,9 +199,19 @@ export function createApp({
       request.profile = profile
       next()
     } catch (error) {
+      if (
+        error instanceof DomainError &&
+        ['UNAUTHORIZED', 'ACCOUNT_DISABLED', 'FORBIDDEN'].includes(error.code)
+      )
+        rate.recordAuthenticationFailure(request)
       next(error)
     }
   })
+  app.use('/api/v1', (request, response, next) => {
+    if (['POST', 'PATCH'].includes(request.method)) rate.mutations(request, response, next)
+    else next()
+  })
+  app.post('/api/v1/orders/:id/payment-sessions', rate.payments)
   app.use('/api/v1', createResourcesRouter(db, businessId), createInventoryRouter(db, businessId))
   app.use('/api/v1', paymentRoutes(db, businessId, payments))
   app.get('/api/v1/me', (request, response) => response.json({ data: signedIn(request) }))

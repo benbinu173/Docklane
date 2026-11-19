@@ -12,27 +12,74 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
   API_HOST: z.string().default('127.0.0.1'),
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(1).default(0),
   DATABASE_URL: z.url(),
   NEON_AUTH_DATABASE_URL: z.url().optional().or(z.literal('')),
   NEON_AUTH_BASE_URL: z.url(),
   NEON_AUTH_JWKS_URL: z.url(),
-  WEB_ORIGINS: z.string().min(1),
-  BUSINESS_ID: z.string().min(1).default('northstar-supply'),
+  WEB_ORIGINS: z.string().min(1).max(4096),
+  BUSINESS_ID: z.string().min(1).max(80).default('northstar-supply'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'silent']).default('info'),
   STRIPE_SECRET_KEY: z.string().startsWith('sk_test_').optional(),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_').optional(),
   CHECKOUT_RETURN_ORIGIN: z.url().optional(),
 })
 export type AppConfig = z.infer<typeof schema>
+function serviceUrl(value: string, kind: 'http' | 'database', production: boolean) {
+  const url = new URL(value)
+  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)
+  if (kind === 'database') {
+    if (!['postgres:', 'postgresql:'].includes(url.protocol)) return false
+    return (
+      !production ||
+      loopback ||
+      ['require', 'verify-ca', 'verify-full'].includes(url.searchParams.get('sslmode') ?? '')
+    )
+  }
+  return (
+    !url.username &&
+    !url.password &&
+    !url.hash &&
+    (url.protocol === 'https:' || (!production && loopback && url.protocol === 'http:'))
+  )
+}
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const result = schema.safeParse(env)
   if (!result.success)
     throw new Error(
       `Invalid API configuration: ${result.error.issues.map((issue) => issue.path.join('.')).join(', ')}. Configure .env.local; secret values are not logged.`,
     )
+  const production = result.data.NODE_ENV === 'production'
   const origins = result.data.WEB_ORIGINS.split(',').map((origin) => origin.trim())
-  if (origins.some((origin) => new URL(origin).origin !== origin))
-    throw new Error('WEB_ORIGINS must contain exact origins without paths or trailing slashes.')
+  try {
+    if (
+      !origins.length ||
+      origins.length > 16 ||
+      origins.some(
+        (origin) => new URL(origin).origin !== origin || !serviceUrl(origin, 'http', production),
+      )
+    )
+      throw new Error()
+  } catch {
+    throw new Error(
+      'WEB_ORIGINS must contain exact HTTPS origins, or loopback HTTP origins outside production.',
+    )
+  }
+  for (const field of [
+    'DATABASE_URL',
+    'NEON_AUTH_DATABASE_URL',
+    'NEON_AUTH_BASE_URL',
+    'NEON_AUTH_JWKS_URL',
+  ] as const) {
+    const value = result.data[field]
+    if (value && !serviceUrl(value, field.includes('DATABASE') ? 'database' : 'http', production))
+      throw new Error(`Invalid ${field} protocol or transport security; values are not logged.`)
+  }
+  if (
+    new URL(result.data.NEON_AUTH_BASE_URL).origin !==
+    new URL(result.data.NEON_AUTH_JWKS_URL).origin
+  )
+    throw new Error('The Auth and JWKS URLs must use the same trusted service origin.')
   const paymentFields = [
     result.data.STRIPE_SECRET_KEY,
     result.data.STRIPE_WEBHOOK_SECRET,

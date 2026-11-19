@@ -1,6 +1,6 @@
 {
   "name": "@docklane/api",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,9 +10,9 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@docklane/contracts": "0.7.0",
-    "@docklane/database": "0.7.0",
-    "@docklane/domain": "0.7.0",
+    "@docklane/contracts": "0.8.0",
+    "@docklane/database": "0.8.0",
+    "@docklane/domain": "0.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

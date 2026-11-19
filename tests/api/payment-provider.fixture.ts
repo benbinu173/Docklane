@@ -8,6 +8,7 @@ import type {
 import { ProviderError } from '@docklane/domain'
 
 export class TestPaymentProvider implements PaymentProvider {
+  constructor(private readonly namespace = '') {}
   sessions = new Map<string, ProviderSession>()
   intents = new Map<string, ProviderIntent>()
   refunds = new Map<string, ProviderRefund>()
@@ -18,7 +19,7 @@ export class TestPaymentProvider implements PaymentProvider {
   async createSession(input: CheckoutSessionRequest, key: string) {
     const prior = this.creates.get(key)
     if (prior) return this.session(prior)
-    const id = `cs_test_${this.creates.size + 1}`
+    const id = `cs_test_${this.namespace}${this.creates.size + 1}`
     const session: ProviderSession = {
       id,
       live: false,
@@ -65,7 +66,7 @@ export class TestPaymentProvider implements PaymentProvider {
   async refund(intentId: string, amount: number, key: string) {
     const prior = this.refundKeys.get(key)
     if (prior) return this.refundStatus(prior)
-    const id = `re_test_${this.refunds.size + 1}`,
+    const id = `re_test_${this.namespace}${this.refunds.size + 1}`,
       result = { id, live: false, intentId, amount, currency: 'inr', status: 'succeeded' }
     this.refundKeys.set(key, id)
     this.refunds.set(id, result)

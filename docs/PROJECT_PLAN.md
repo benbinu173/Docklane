@@ -2,7 +2,7 @@
 
 Created: 18 November 2026, Asia/Kolkata.
 
-Status: Phases 0-7 complete. Reservations, Stripe test payments, fulfillment, returns/refunds, connected operations UX, and the public product page are implemented. Phases 8-9 remain planned.
+Status: Phases 0-8 complete. Docklane is a verified release candidate. Phase 9 deployment, demo, and portfolio packaging remains planned.
 
 ## Product objective
 
@@ -295,6 +295,8 @@ Completion checks:
 Depends on: Phase 6. Output: a coherent, polished product experience.
 
 ## Phase 8: Correctness, security, and performance verification
+
+Status: complete. See [Phase 8 delivery notes](PHASE_8.md) for 139 passing checks, request protection, failure recovery, representative query measurements, and production browser verification.
 
 Deliverables:
 

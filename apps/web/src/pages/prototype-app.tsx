@@ -8,6 +8,7 @@ import { useWorkspace } from '@/hooks/use-workspace'
 import { DemoProvider } from '@/lib/demo-context'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from 'sonner'
+import '@/styles.css'
 
 const Overview = lazy(() => import('@/pages/overview'))
 const Inventory = lazy(() => import('@/pages/inventory'))

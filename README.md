@@ -4,7 +4,7 @@
 
 Docklane is an order and inventory platform with a navy, mist, and lime visual identity. Its central engineering objective is preventing overselling when customers order simultaneously.
 
-**Phases 1-7 are complete.** Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. The connected operations overview adds explainable metrics, date/warehouse filters, personal saved views, and keyboard search. See [the build plan](docs/PROJECT_PLAN.md) and [Phase 7 delivery notes](docs/PHASE_7.md).
+**Phases 1-8 are complete.** Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. The connected operations overview adds explainable metrics, date/warehouse filters, personal saved views, and keyboard search. The release candidate now includes request protection, queue-disconnect recovery checks, connected workflows in CI, and measured query/frontend improvements. See [the build plan](docs/PROJECT_PLAN.md) and [Phase 8 delivery notes](docs/PHASE_8.md).
 
 ## Open the current workspace
 
@@ -70,9 +70,10 @@ npm run build
 npm run test:unit
 npm run test:integration
 npm run test:e2e
+npm run test:connected
 ```
 
-On a fresh machine, install Chromium with `npx playwright install chromium`. Ordinary browser tests start the web server automatically and require no cloud credentials. Integration tests require the local PostgreSQL service.
+On a fresh machine, install Chromium with `npx playwright install chromium`. Ordinary browser tests start the web server automatically and require no cloud credentials. Integration and connected browser tests require the isolated local PostgreSQL service. Connected tests use a separate real API process with signed synthetic identities and simulated payment transport; build the web client with a configured `VITE_NEON_AUTH_URL` first. CI supplies a synthetic Auth URL and tests the production preview.
 
 Real development identity checks run separately, with API and web servers running:
 
@@ -100,9 +101,9 @@ Run `npm run prove:concurrency` against the dedicated local test database to rep
 
 These checks capture clean previews intentionally. Reset verification reads a provider-generated token from the development database; it does not establish inbox delivery. Auth traces and failure screenshots are disabled; automatic failure page snapshots are suppressed. The runner redacts credentials and reset tokens from output and text diagnostics. The Admin demo password was rotated during Phase 3 verification; use the current credential in `.local/demo-accounts.json`.
 
-The [CI workflow](.github/workflows/ci.yml) configures PostgreSQL/Redis and runs formatting, linting, type checking, builds, domain/API tests, and the public browser suite. Live Auth checks stay outside ordinary CI.
+Phase 8 validation passed **139 distinct checks**: eight domain, 103 PostgreSQL/API, and 28 production browser tests, including a focused timing rerun. Limits, safe request/configuration failures, concurrent first login, queue disconnect/reconnection, replacement leases, and complete customer/staff workflows passed. All 81 original balances and DL-10023 were preserved. The representative benchmark used 20,000 balances and 5,000 orders; its catalog stock query improved from 3.157 ms to 0.512 ms with a measured SKU index. The local mobile Lighthouse run scored 92 performance and 100 accessibility with zero layout shift. See [Phase 8 results and reproduction commands](docs/PHASE_8.md).
 
-The dependency audit has an unresolved `picomatch` advisory through build/test tooling. Neon Auth's optional Vitest peer makes some tooling appear in `--omit=dev` results. See [Phase 2 dependency notes](docs/PHASE_2.md#dependency-review) for scope; do not use a forced downgrade.
+The [CI workflow](.github/workflows/ci.yml) configures PostgreSQL/Redis and runs formatting, linting, type checking, builds, domain/API tests, the concurrency script, and public/connected production browser tests. Live Auth checks stay outside ordinary CI. The current dependency audit reports zero advisories; the Phase 2 audit notes describe historical findings.
 
 ## Stack and documents
 
@@ -119,7 +120,8 @@ React/Vite/TypeScript, Tailwind v4, customized shadcn/Radix, self-hosted Geist, 
 - [Phase 5 delivery, setup, and previews](docs/PHASE_5.md)
 - [Phase 6 fulfillment, refunds, returns, and previews](docs/PHASE_6.md)
 - [Phase 7 operations UX, product page, and performance](docs/PHASE_7.md)
+- [Phase 8 security, recovery, CI workflows, and measured performance](docs/PHASE_8.md)
 - [Repeatable concurrency proof](docs/CONCURRENCY_PROOF.md)
 - [Asset sources](docs/ASSETS.md)
 
-Next: [Phase 8 correctness, security, and performance verification](docs/PROJECT_PLAN.md#phase-8-correctness-security-and-performance-verification).
+Next: [Phase 9 deployment, demo, and portfolio packaging](docs/PROJECT_PLAN.md#phase-9-deployment-demo-and-portfolio-packaging).

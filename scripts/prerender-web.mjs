@@ -61,13 +61,18 @@ try {
   const styles = landing.css
     .map((file) => `<link rel="stylesheet" crossorigin href="/${file}">`)
     .join('\n    ')
+  const fonts = (manifest['index.html']?.assets ?? [])
+    .filter((file) => /geist-latin-(400|500)-normal-.*\.woff2$/.test(file))
+    .map((file) => `<link rel="preload" as="font" type="font/woff2" crossorigin href="/${file}">`)
+    .join('\n    ')
+  if (!fonts) throw new Error('The above-fold product page fonts could not be located.')
   if (!html.includes('<div id="root"></div>'))
     throw new Error('The empty application root could not be located.')
   await writeFile(
     `${web}/dist/welcome.html`,
     html
       .replace('<div id="root"></div>', `<div id="root">${markup}</div>`)
-      .replace('</head>', `    ${styles}\n  </head>`)
+      .replace('</head>', `    ${styles}\n    ${fonts}\n  </head>`)
       .replace(/<title>[^<]*<\/title>/, '<title>Docklane | Every order, moving forward</title>'),
   )
   console.log(

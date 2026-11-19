@@ -8,8 +8,21 @@ const prismaConfig = resolve('packages/database/prisma.config.ts')
 const cli = resolve('node_modules/prisma/build/index.js')
 const env = { ...process.env }
 if (action === 'test-migrate') {
-  if (!env.TEST_DATABASE_URL || !new URL(env.TEST_DATABASE_URL).pathname.endsWith('/docklane_test'))
-    throw new Error('TEST_DATABASE_URL must point to the dedicated docklane_test database.')
+  let testUrl
+  try {
+    testUrl = new URL(env.TEST_DATABASE_URL)
+  } catch {
+    // Invalid URLs are rejected below without exposing their values.
+  }
+  if (
+    !testUrl ||
+    !['postgres:', 'postgresql:'].includes(testUrl.protocol) ||
+    testUrl.pathname !== '/docklane_test' ||
+    !['127.0.0.1', 'localhost'].includes(testUrl.hostname)
+  )
+    throw new Error(
+      'TEST_DATABASE_URL must point to the dedicated loopback docklane_test database.',
+    )
   env.DATABASE_URL = env.TEST_DATABASE_URL
   env.DATABASE_URL_UNPOOLED = env.TEST_DATABASE_URL
 } else if (action === 'generate') {

@@ -1,6 +1,6 @@
 {
   "name": "docklane",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "private": true,
   "workspaces": [
@@ -30,6 +30,8 @@
     "check:a11y": "node scripts/check-accessibility.mjs",
     "capture:preview": "node scripts/capture-preview.mjs",
     "test:auth": "node scripts/test-auth.mjs",
+    "test:connected": "node scripts/test-connected.mjs",
+    "benchmark:operations": "tsx scripts/benchmark-operations.ts",
     "prove:concurrency": "tsx scripts/prove-concurrency.ts",
     "dev:worker": "npm run db:generate && npm run build:packages && npm run dev --workspace @docklane/worker",
     "start:worker": "npm run start --workspace @docklane/worker"

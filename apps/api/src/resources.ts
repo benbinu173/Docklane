@@ -43,12 +43,11 @@ export function createResourcesRouter(db: PrismaClient, businessId: string) {
   const router = Router()
   router.use('/products', requirePermission('viewWorkspace'))
   router.get(['/products/categories', '/catalog/categories'], async (request, response) => {
-    const data = await db.product.findMany({
-      where: { businessId, ...(request.path.startsWith('/catalog') ? { archived: false } : {}) },
-      distinct: ['category'],
-      select: { category: true },
-      orderBy: { category: 'asc' },
-    })
+    // Prisma's ordinary distinct reads every product and deduplicates in the
+    // application. Return only the distinct labels from PostgreSQL instead.
+    const data = await db.$queryRaw<
+      { category: string }[]
+    >`SELECT DISTINCT category FROM products WHERE "businessId" = ${businessId} ${request.path.startsWith('/catalog') ? Prisma.sql`AND NOT archived` : Prisma.empty} ORDER BY category ASC`
     response.json({ data: data.map(({ category }) => category) })
   })
   router.get('/products', requirePermission('viewWorkspace'), async (request, response) => {

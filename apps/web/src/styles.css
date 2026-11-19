@@ -1,4 +1,13 @@
 @import 'tailwindcss';
+@import './base.css';
+
+/* Keep rich-color notifications readable at the small toast text size. */
+.docklane-toast {
+  --success-text: #24602b;
+  --error-text: #9c242a;
+  --warning-text: #725400;
+  --info-text: #185980;
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -21,94 +30,6 @@
   --radius-md: 8px;
   --radius-lg: 14px;
   --radius-xl: 18px;
-}
-:root {
-  font-family: 'Geist', sans-serif;
-  color: #101d2c;
-  background: #f4f6f8;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  --background: #f4f6f8;
-  --foreground: #101d2c;
-  --primary: #b9f36b;
-  --radius: 0.875rem;
-}
-* {
-  box-sizing: border-box;
-}
-body {
-  margin: 0;
-  min-width: 320px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-button,
-input,
-select {
-  font: inherit;
-}
-button {
-  cursor: pointer;
-}
-button:disabled {
-  cursor: not-allowed;
-}
-button,
-a,
-input {
-  -webkit-tap-highlight-color: transparent;
-}
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid #101d2c;
-  outline-offset: 3px;
-}
-input::placeholder {
-  color: #526173;
-}
-svg {
-  flex-shrink: 0;
-}
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
-h1 {
-  font-weight: 600;
-  font-size: 30px;
-  line-height: 1.22;
-  letter-spacing: -1.15px;
-}
-h2 {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.35px;
-  line-height: 1.4;
-}
-h3 {
-  font-weight: 600;
-}
-::selection {
-  background: #d6edb4;
-  color: #101d2c;
-}
-.muted {
-  color: #526173;
-}
-.tiny {
-  font-size: 11px;
-}
-.mono {
-  font-family: 'Geist Mono', monospace;
-  letter-spacing: -0.2px;
-}
-.numeric {
-  font-variant-numeric: tabular-nums;
 }
 .warning-text {
   color: #855a00;

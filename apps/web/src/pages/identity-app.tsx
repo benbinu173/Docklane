@@ -13,6 +13,7 @@ import {
   Team,
   Account,
 } from './connected'
+import '@/styles.css'
 import '@/identity.css'
 import '@/phase3.css'
 import '@/phase4.css'

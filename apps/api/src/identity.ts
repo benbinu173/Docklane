@@ -1,4 +1,4 @@
-import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose'
+import { createRemoteJWKSet, jwtVerify, errors, type JWTVerifyGetKey } from 'jose'
 import { DomainError } from '@docklane/domain'
 import type { createAuthSessionStore } from '@docklane/database'
 
@@ -23,10 +23,20 @@ export function createIdentityVerifier(
         clockTolerance: 5,
       })
       if (!payload.sub || !payload.exp || payload.exp - (payload.iat ?? 0) > 905)
-        throw new Error('Invalid token claims')
+        throw new DomainError('UNAUTHORIZED', 'Sign in again to continue.', 401)
       subject = payload.sub
-    } catch {
-      throw new DomainError('UNAUTHORIZED', 'Sign in again to continue.', 401)
+    } catch (error) {
+      if (error instanceof DomainError) throw error
+      if (
+        error instanceof errors.JOSEError &&
+        !['ERR_JWKS_TIMEOUT', 'ERR_JWKS_INVALID'].includes(error.code)
+      )
+        throw new DomainError('UNAUTHORIZED', 'Sign in again to continue.', 401)
+      throw new DomainError(
+        'IDENTITY_UNAVAILABLE',
+        'Sign-in services are temporarily unavailable. Try again shortly.',
+        503,
+      )
     }
     let session
     try {
