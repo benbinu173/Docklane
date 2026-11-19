@@ -20,7 +20,9 @@ export default defineConfig({
   webServer: externalBaseUrl
     ? undefined
     : {
-        command: 'npm run dev:web',
+        command: process.env.CI
+          ? 'npm run preview --workspace @docklane/web -- --port 5173 --host 127.0.0.1 --strictPort'
+          : 'npm run dev:web',
         url: 'http://127.0.0.1:5173',
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

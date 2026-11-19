@@ -12,7 +12,8 @@ const web = fileURLToPath(new URL('../apps/web/', import.meta.url))
 const server = await createServer({
   root: web,
   configFile: `${web}/vite.config.ts`,
-  server: { middlewareMode: true },
+  cacheDir: fileURLToPath(new URL('../node_modules/.vite-prerender/', import.meta.url)),
+  server: { middlewareMode: true, watch: null },
   appType: 'custom',
   optimizeDeps: { noDiscovery: true, include: [] },
 })
