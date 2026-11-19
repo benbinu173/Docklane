@@ -1,0 +1,9 @@
+package-lock.json
+node_modules/
+dist/
+playwright-report/
+test-results/
+docs/previews/
+.local/
+packages/database/src/generated/
+coverage/

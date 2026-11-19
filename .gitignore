@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+.DS_Store
+*.local
+.local/
+*.tsbuildinfo
+coverage/
+packages/database/src/generated/
+.neon

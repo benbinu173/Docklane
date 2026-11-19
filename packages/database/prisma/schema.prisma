@@ -1,0 +1,382 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+  CUSTOMER
+}
+enum OrderStatus {
+  AWAITING_PAYMENT
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+enum PaymentStatus {
+  PENDING
+  CAPTURED
+  FAILED
+  REFUND_PENDING
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+enum FulfillmentStatus {
+  UNFULFILLED
+  PACKED
+  SHIPPED
+}
+enum ReservationStatus {
+  HELD
+  ALLOCATED
+  CONSUMED
+  RELEASED
+}
+enum MovementType {
+  OPENING
+  RESERVE
+  RELEASE
+  SHIP
+  ADJUST
+  RETURN
+}
+enum RefundStatus {
+  REQUESTED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  RECONCILIATION_REQUIRED
+}
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Business {
+  id String @id
+  name String
+  currency String @default("INR") @db.Char(3)
+  timezone String @default("Asia/Kolkata")
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  profiles UserProfile[]
+  products Product[]
+  warehouses Warehouse[]
+  orders Order[]
+  audits AuditEvent[]
+  @@map("businesses")
+}
+
+model UserProfile {
+  id String @id @default(uuid()) @db.Uuid
+  authSubject String @unique
+  name String
+  email String
+  role Role @default(CUSTOMER)
+  active Boolean @default(true)
+  businessId String
+  business Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  orders Order[]
+  movements InventoryMovement[]
+  audits AuditEvent[]
+  idempotencyRecords IdempotencyRecord[]
+  requestedRefunds RefundAttempt[]
+  shipments Shipment[]
+  receivedReturns ReturnReceipt[]
+  @@index([businessId, role, active])
+  @@map("user_profiles")
+}
+
+model Product {
+  sku String @id
+  name String
+  category String
+  pricePaise Int
+  image String
+  color String
+  archived Boolean @default(false)
+  version Int @default(0)
+  businessId String
+  business Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  balances InventoryBalance[]
+  orderItems OrderItem[]
+  @@index([businessId, archived, category])
+  @@map("products")
+}
+
+model Warehouse {
+  id String @id
+  code String @unique
+  name String
+  city String
+  address String
+  lead String
+  priority Int @default(0)
+  archived Boolean @default(false)
+  version Int @default(0)
+  businessId String
+  business Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  balances InventoryBalance[]
+  orders Order[]
+  @@index([businessId, priority])
+  @@map("warehouses")
+}
+
+model InventoryBalance {
+  id String @id
+  sku String
+  warehouseId String
+  product Product @relation(fields: [sku], references: [sku], onDelete: Restrict)
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  onHand Int @default(0)
+  reserved Int @default(0)
+  threshold Int @default(12)
+  version Int @default(0)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  movements InventoryMovement[]
+  reservations StockReservation[]
+  @@unique([warehouseId, sku])
+  @@map("inventory_balances")
+}
+
+model InventoryMovement {
+  id String @id @default(uuid())
+  balanceId String
+  balance InventoryBalance @relation(fields: [balanceId], references: [id], onDelete: Restrict)
+  type MovementType
+  deltaOnHand Int
+  deltaReserved Int
+  onHandAfter Int
+  reservedAfter Int
+  balanceVersion Int?
+  reason String
+  actorId String? @db.Uuid
+  actor UserProfile? @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  orderId String? @db.Uuid
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([balanceId, createdAt])
+  @@unique([balanceId, balanceVersion])
+  @@map("inventory_movements")
+}
+
+model Order {
+  id String @id @default(uuid()) @db.Uuid
+  number String @unique
+  businessId String
+  business Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  customerId String @db.Uuid
+  customer UserProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  customerName String
+  warehouseId String
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  orderStatus OrderStatus @default(AWAITING_PAYMENT)
+  paymentStatus PaymentStatus @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
+  subtotalPaise Int
+  shippingPaise Int @default(0)
+  totalPaise Int
+  currency String @default("INR") @db.Char(3)
+  deliveryAddress Json
+  expiresAt DateTime? @db.Timestamptz(3)
+  cancelledAt DateTime? @db.Timestamptz(3)
+  confirmedAt DateTime? @db.Timestamptz(3)
+  packedAt DateTime? @db.Timestamptz(3)
+  expiredAt DateTime? @db.Timestamptz(3)
+  cancelReason String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  items OrderItem[]
+  reservations StockReservation[]
+  movements InventoryMovement[]
+  payment Payment?
+  shipment Shipment?
+  returns ReturnReceipt[]
+  @@index([businessId, createdAt])
+  @@index([customerId, createdAt])
+  @@index([orderStatus, expiresAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(uuid()) @db.Uuid
+  orderId String @db.Uuid
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sku String
+  product Product @relation(fields: [sku], references: [sku], onDelete: Restrict)
+  name String
+  image String
+  quantity Int
+  unitPricePaise Int
+  totalPaise Int
+  returnItems ReturnItem[]
+  @@unique([orderId, sku])
+  @@map("order_items")
+}
+
+model StockReservation {
+  id String @id @default(uuid()) @db.Uuid
+  orderId String @db.Uuid
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  balanceId String
+  balance InventoryBalance @relation(fields: [balanceId], references: [id], onDelete: Restrict)
+  quantity Int
+  status ReservationStatus @default(HELD)
+  expiresAt DateTime @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@unique([orderId, balanceId])
+  @@index([status, expiresAt])
+  @@index([balanceId, status], map: "stock_reservations_balanceid_status_idx")
+  @@map("stock_reservations")
+}
+
+model Payment {
+  id String @id @default(uuid()) @db.Uuid
+  orderId String @unique @db.Uuid
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  provider String
+  providerReference String? @unique
+  providerIdempotencyKey String @unique
+  sessionId String? @unique(map: "payments_session_id_key")
+  checkoutUrl String?
+  sessionExpiresAt DateTime? @db.Timestamptz(3)
+  providerRequest Json?
+  lastReconciledAt DateTime? @db.Timestamptz(3)
+  status PaymentStatus @default(PENDING)
+  amountPaise Int
+  currency String @default("INR") @db.Char(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  refunds RefundAttempt[]
+  @@map("payments")
+}
+
+model RefundAttempt {
+  id String @id @default(uuid()) @db.Uuid
+  paymentId String @db.Uuid
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  amountPaise Int
+  reason String
+  status RefundStatus @default(REQUESTED)
+  purpose String @default("ADMIN")
+  lastReconciledAt DateTime? @db.Timestamptz(3)
+  resolvedAt DateTime? @db.Timestamptz(3)
+  providerIdempotencyKey String @unique
+  providerReference String? @unique
+  requestedBy String @db.Uuid
+  requester UserProfile @relation(fields: [requestedBy], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  @@index([paymentId, status])
+  @@map("refund_attempts")
+}
+
+model Shipment {
+  id String @id @default(uuid()) @db.Uuid
+  orderId String @unique @db.Uuid
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  trackingReference String
+  carrier String
+  trackingUrl String?
+  reason String @default("Order fulfillment")
+  shippedBy String @db.Uuid
+  shipper UserProfile @relation(fields: [shippedBy], references: [id], onDelete: Restrict)
+  shippedAt DateTime @default(now()) @db.Timestamptz(3)
+  @@map("shipments")
+}
+
+model ReturnReceipt {
+  id String @id @default(uuid()) @db.Uuid
+  orderId String @db.Uuid
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  reason String
+  receivedBy String @db.Uuid
+  receiver UserProfile @relation(fields: [receivedBy], references: [id], onDelete: Restrict)
+  receivedAt DateTime @default(now()) @db.Timestamptz(3)
+  items ReturnItem[]
+  @@index([orderId, receivedAt])
+  @@map("return_receipts")
+}
+
+model ReturnItem {
+  id String @id @default(uuid()) @db.Uuid
+  receiptId String @db.Uuid
+  receipt ReturnReceipt @relation(fields: [receiptId], references: [id], onDelete: Restrict)
+  orderItemId String @db.Uuid
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  quantity Int
+  restockedQuantity Int @default(0)
+  @@unique([receiptId, orderItemId])
+  @@map("return_items")
+}
+
+model WebhookReceipt {
+  id String @id @default(uuid()) @db.Uuid
+  provider String
+  eventId String
+  eventType String
+  payload Json
+  receivedAt DateTime @default(now()) @db.Timestamptz(3)
+  processedAt DateTime? @db.Timestamptz(3)
+  @@unique([provider, eventId])
+  @@map("webhook_receipts")
+}
+
+model IdempotencyRecord {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Restrict)
+  operation String
+  key String
+  fingerprint String
+  status JobStatus @default(PENDING)
+  outcome Json?
+  expiresAt DateTime @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@unique([userId, operation, key])
+  @@map("idempotency_records")
+}
+
+model OutboxEvent {
+  id String @id @default(uuid()) @db.Uuid
+  type String
+  businessId String?
+  payload Json
+  status JobStatus @default(PENDING)
+  attempts Int @default(0)
+  lockedAt DateTime? @db.Timestamptz(3)
+  leaseToken String? @db.Uuid
+  lastErrorCode String?
+  availableAt DateTime @default(now()) @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  processedAt DateTime? @db.Timestamptz(3)
+  @@index([status, availableAt])
+  @@map("outbox_events")
+}
+
+model AuditEvent {
+  id String @id @default(uuid()) @db.Uuid
+  businessId String
+  business Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  actorId String? @db.Uuid
+  actor UserProfile? @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action String
+  entityType String
+  entityId String
+  metadata Json
+  requestId String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([businessId, createdAt])
+  @@index([businessId, entityType, entityId, createdAt])
+  @@map("audit_events")
+}

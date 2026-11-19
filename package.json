@@ -1,0 +1,55 @@
+{
+  "name": "docklane",
+  "version": "0.6.0",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run db:generate && npm run build:packages && concurrently --kill-others-on-fail --names API,WEB,WORKER \"npm run dev --workspace @docklane/api\" \"npm run dev --workspace @docklane/web\" \"npm run dev --workspace @docklane/worker\"",
+    "dev:web": "npm run build --workspace @docklane/contracts && npm run dev --workspace @docklane/web",
+    "dev:api": "npm run db:generate && npm run build:packages && npm run dev --workspace @docklane/api",
+    "build": "npm run db:generate && npm run build:packages && npm run build --workspace @docklane/api && npm run build --workspace @docklane/web && npm run build --workspace @docklane/worker",
+    "build:packages": "npm run build --workspace @docklane/contracts && npm run build --workspace @docklane/database && npm run build --workspace @docklane/domain",
+    "typecheck": "npm run build:packages && npm run typecheck --workspace @docklane/api && npm run typecheck --workspace @docklane/web && tsc -p tsconfig.tools.json --noEmit && npm run typecheck --workspace @docklane/worker",
+    "lint": "npm run lint --workspace @docklane/web && eslint apps/api/src apps/worker/src packages tests scripts",
+    "format:check": "prettier --check .",
+    "db:generate": "node scripts/database.mjs generate",
+    "db:migrate": "node scripts/database.mjs migrate",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:test:migrate": "node scripts/database.mjs test-migrate",
+    "auth:seed": "node scripts/seed-auth.mjs",
+    "setup:local": "node scripts/setup-local.mjs",
+    "test:unit": "vitest run --project domain",
+    "test:integration": "npm run db:test:migrate && vitest run --project api",
+    "test:e2e": "playwright test",
+    "preview": "npm run preview --workspace @docklane/web",
+    "format": "prettier --write .",
+    "check:a11y": "node scripts/check-accessibility.mjs",
+    "capture:preview": "node scripts/capture-preview.mjs",
+    "test:auth": "node scripts/test-auth.mjs",
+    "prove:concurrency": "tsx scripts/prove-concurrency.ts",
+    "dev:worker": "npm run db:generate && npm run build:packages && npm run dev --workspace @docklane/worker",
+    "start:worker": "npm run start --workspace @docklane/worker"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "^1.56.1",
+    "prettier": "3.10.1",
+    "@neon/config": "^1.13.0",
+    "@eslint/js": "^9.39.1",
+    "concurrently": "^9.2.1",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
