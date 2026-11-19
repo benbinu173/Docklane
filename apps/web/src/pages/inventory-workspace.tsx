@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useIdentity } from '@/lib/identity-context'
+import { SavedViews } from '@/components/saved-views'
+import { useBoundedRefresh } from '@/lib/operations-client'
 import {
   useResourceView,
   useStockOptions,
@@ -58,11 +60,13 @@ export function InventoryWorkspace() {
       !options.warehouses.data?.data.some((warehouse) => warehouse.id === selectedWarehouseId),
   })
   const [tracking, setTracking] = useState(false)
+  const refresh = useBoundedRefresh()
   const returnFocus = useRef<HTMLButtonElement | null>(null)
   const query = useQuery({
     queryKey: ['phase3', 'inventory', view.query],
     queryFn: () => api<InventoryPage>(`/inventory?${view.query}`),
     placeholderData: keepPreviousData,
+    refetchInterval: () => (tracking || view.params.get('stockId') ? false : refresh()),
   })
   const summary = query.data?.summary
   const stockId = view.params.get('stockId')
@@ -115,6 +119,7 @@ export function InventoryWorkspace() {
             ['low', 'Low stock', summary?.low],
             ['reserved', 'Reserved', summary?.withReservations],
             ['out', 'Out of stock', summary?.out],
+            ['attention', 'Needs review', summary ? summary.low + summary.out : undefined],
           ].map(([value, label, count]) => (
             <button
               key={value}
@@ -191,6 +196,7 @@ export function InventoryWorkspace() {
             </button>
           )}
         </div>
+        <SavedViews kind="inventory" />
         <div aria-busy={query.isFetching}>
           {query.isPlaceholderData && (
             <p className="p3-updating" role="status">

@@ -4,7 +4,7 @@
 
 Docklane is an order and inventory platform with a navy, mist, and lime visual identity. Its central engineering objective is preventing overselling when customers order simultaneously.
 
-**Phases 1-6 are complete.** Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. See [the build plan](docs/PROJECT_PLAN.md) and [Phase 6 delivery notes](docs/PHASE_6.md).
+**Phases 1-7 are complete.** Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. The connected operations overview adds explainable metrics, date/warehouse filters, personal saved views, and keyboard search. See [the build plan](docs/PROJECT_PLAN.md) and [Phase 7 delivery notes](docs/PHASE_7.md).
 
 ## Open the current workspace
 
@@ -16,7 +16,7 @@ docker compose --env-file .env.local up -d --wait
 npm run dev
 ```
 
-Open [Docklane](http://127.0.0.1:5173), then choose **Sign in to Docklane**, or open [sign-in](http://127.0.0.1:5173/auth/sign-in) directly. Development credentials are in the ignored `.local/demo-accounts.json` file. Admin, Operator, and Customer accounts open the appropriate view.
+Open the [Docklane product page](http://127.0.0.1:5173/welcome) to explore the platform, or the [sample workspace](http://127.0.0.1:5173), then choose **Sign in to Docklane**, or open [sign-in](http://127.0.0.1:5173/auth/sign-in) directly. Development credentials are in the ignored `.local/demo-accounts.json` file. Admin, Operator, and Customer accounts open the appropriate view.
 
 To run only the public prototype, use `npm run dev:web`; it works without cloud configuration. To run only the API, use `npm run dev:api`. `npm run dev` also starts the worker; `npm run dev:worker` runs it separately. Worker readiness is at [localhost:4010/health/ready](http://localhost:4010/health/ready). API readiness is at [localhost:4000/health/ready](http://localhost:4000/health/ready).
 
@@ -43,9 +43,10 @@ Never commit `.env.local`, `.local`, or connection credentials. Redis supports t
 
 ## What works
 
+- Product page: real workspace previews, an animated fulfillment narrative, a reservation-proof illustration, system light/dark themes, and demo/sign-in entry at /welcome.
 - Public prototype: inventory filters, sorting, pagination, export, stock drawers, sample adjustments, order drawers, simulated packing, warehouse views, command menu, and responsive navigation.
 - Identity: customer signup, sign-in, sign-out, session restoration, password recovery/reset, protected routes, and explicit failure states.
-- Connected workspace: saved inventory totals, warehouse summaries, searchable order lists, separate order/payment/fulfillment states, and order details.
+- Connected workspace: API-backed briefing, actionable queues, explainable stock/test-money metrics, date/warehouse filters, actor-stamped activity, richer order filters, eight account-specific browser-local saved views, keyboard quick search, and preserved detail/list context.
 - Products and warehouses: Admin create/edit/archive/restore flows, immutable SKUs, INR prices, site details, and an accessible warehouse explorer.
 - Inventory: API-backed combined filters, sorting, pagination, zero-count tracking, reviewed stock adjustments, thresholds, and immutable movement history. Admins and Operators can correct stock; reserved units stay protected.
 - Customer account: a responsive collection and product details with saved prices/availability, its own order history, delivery details, and account information.
@@ -81,14 +82,17 @@ npm run test:auth -- --phase3
 npm run test:auth -- --phase4
 npm run test:auth -- --phase5
 npm run test:auth -- --phase6
+npm run test:auth -- --phase7
 npm run test:auth -- --all
 ```
 
-The identity suite checks real role-specific login, reload, logout replay rejection, ownership, signup, and password reset. The Phase 3 suite checks product/site management, stock persistence, stale-edit recovery, lost-response retries, customer catalog permissions, account-loading recovery, and responsive accessibility. The Phase 4 suite checks saved bags, delivery/price review, reservations, lost-response/reload recovery, later bag additions, changed prices, unavailable quantities, unpaid cancellation, staff visibility, and responsive accessibility. The Phase 5 suite checks payment/error recovery, return-URL behavior, pending/confirmed/expired/refund screens, responsive accessibility, and staff recovery controls. Its payment outcomes are intercepted for UI verification; database checks use a deterministic provider stand-in with real Stripe signature verification. The Phase 6 suite checks real test refunds, fulfillment, paid cancellation, return/restock operations, lost-response retries, and responsive accessibility with isolated fixtures. `--all` runs all five identity suites with the public prototype suite.
+The identity suite checks real role-specific login, reload, logout replay rejection, ownership, signup, and password reset. The Phase 3 suite checks product/site management, stock persistence, stale-edit recovery, lost-response retries, customer catalog permissions, account-loading recovery, and responsive accessibility. The Phase 4 suite checks saved bags, delivery/price review, reservations, lost-response/reload recovery, later bag additions, changed prices, unavailable quantities, unpaid cancellation, staff visibility, and responsive accessibility. The Phase 5 suite checks payment/error recovery, return-URL behavior, pending/confirmed/expired/refund screens, responsive accessibility, and staff recovery controls. Its payment outcomes are intercepted for UI verification; database checks use a deterministic provider stand-in with real Stripe signature verification. The Phase 6 suite checks real test refunds, fulfillment, paid cancellation, return/restock operations, lost-response retries, and responsive accessibility with isolated fixtures. The Phase 7 suite checks dashboard/list reconciliation, filter context, personal views, keyboard search, failed-read recovery, bounded refresh, and responsive staff/customer accessibility. `--all` runs all six identity suites with the public prototype and landing-page suites.
 
 Phase 5 local verification passed all 99 tests: seven domain, 60 PostgreSQL/API, and 32 production browser checks. The full browser run used the compiled API and production frontend, finished in 12.7 minutes, and included accessibility/layout checks at 390, 768, 1366, and 1440 px. Formatting, lint, type checking, and builds pass. Additional hosted Stripe sandbox purchase/refund and actual saved-interface smoke checks passed. See [the Phase 5 delivery notes and previews](docs/PHASE_5.md#verification) for the verification coverage.
 
 Phase 6 validation covers **125 passing checks**: eight domain, 80 PostgreSQL/API, and 37 production browser checks, including focused reruns after fixes. Actual partial/full/cancellation Stripe test refunds and a lost-response stock retry passed. Final reconciliation found zero stock-ledger/reservation mismatches across 81 balances and zero excessive refunds. All 71 prior physical/reserved balances and DL-10023 were preserved. See [Phase 6 verification](docs/PHASE_6.md#verification).
+
+Phase 7 validation passed **118 distinct checks**: eight domain, 88 PostgreSQL/API, and 22 production browser checks, including focused reruns after timing fixes. Saved views, queue/list reconciliation, keyboard search, bounded refresh, recovery, and responsive light/dark product views passed. All 81 development balances and DL-10023 remained unchanged. The static product page scored 84 performance and 100 accessibility in one local Lighthouse mobile run, with 3.8-second LCP and 30 ms blocking time. Remaining font/render delays are recorded for Phase 8. See [Phase 7 verification and measurements](docs/PHASE_7.md#verification), including the `/welcome` static-host routing requirement.
 
 The running development worker also passed an isolated automatic-expiry check. After Stripe configuration, a real hosted test session was created, recovered on retry, and closed by the worker after unpaid cancellation; the actual signed expiry webhook was received and processed. The user completed DL-10023's INR 1,499 sandbox checkout, with one confirmation audit and one-unit allocation. The expired DL-10024 fixture then received an INR 100 test payment and one full automatic Stripe refund; repeated reconciliation preserved that single refund and released stock. A final read-only reconciliation found no mismatches between the development stock balances, movement ledger, and active reservations; seeded physical stock was preserved and verification fixtures were cleared and archived.
 
@@ -114,7 +118,8 @@ React/Vite/TypeScript, Tailwind v4, customized shadcn/Radix, self-hosted Geist, 
 - [Phase 4 delivery and previews](docs/PHASE_4.md)
 - [Phase 5 delivery, setup, and previews](docs/PHASE_5.md)
 - [Phase 6 fulfillment, refunds, returns, and previews](docs/PHASE_6.md)
+- [Phase 7 operations UX, product page, and performance](docs/PHASE_7.md)
 - [Repeatable concurrency proof](docs/CONCURRENCY_PROOF.md)
 - [Asset sources](docs/ASSETS.md)
 
-Next: [Phase 7 complete UX, operations views, and landing page](docs/PROJECT_PLAN.md#phase-7-complete-ux-operations-views-and-landing-page).
+Next: [Phase 8 correctness, security, and performance verification](docs/PROJECT_PLAN.md#phase-8-correctness-security-and-performance-verification).

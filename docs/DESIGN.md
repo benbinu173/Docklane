@@ -1,6 +1,6 @@
 # Docklane design direction
 
-Status: Phase 1 staff prototype and connected inventory, catalog, and warehouse screens implemented. Phase 4 adds the customer bag, delivery/price review, stock reservations, and order journey. Phase 5 adds payment/expiry/refund states and reviewed background-task recovery. The marketing page remains planned. See [Phase 1](PHASE_1.md), [Phase 3](PHASE_3.md), [Phase 4](PHASE_4.md), and [Phase 5](PHASE_5.md) for previews and evidence.
+Status: Phases 1-7 implemented. The connected briefing includes explainable metrics, attention queues, warehouse/date filters, personal saved views, and role-scoped keyboard search. The public product page at /welcome uses real product screenshots, a scroll-linked fulfillment lane, an illustrative concurrency proof, and system light/dark themes. See [Phase 7](PHASE_7.md) for verification and previews.
 
 ## Design read
 

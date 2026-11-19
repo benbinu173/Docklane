@@ -1,9 +1,11 @@
 import { z } from 'zod'
 import { paginationSchema } from './pagination.js'
+import { dateFilters, orderQueues, validDateRange } from './operations.js'
 export { paginationSchema } from './pagination.js'
 export * from './inventory.js'
 export * from './checkout.js'
 export * from './fulfillment.js'
+export * from './operations.js'
 
 export const roles = ['ADMIN', 'OPERATOR', 'CUSTOMER'] as const
 export const roleSchema = z.enum(roles)
@@ -30,11 +32,17 @@ export type PaymentStatus = (typeof paymentStatuses)[number]
 export type FulfillmentStatus = (typeof fulfillmentStatuses)[number]
 export type ReservationStatus = (typeof reservationStatuses)[number]
 
-export const orderQuerySchema = paginationSchema.extend({
-  q: z.string().trim().max(100).default(''),
-  status: z.enum(orderStatuses).optional(),
-  warehouse: z.string().trim().max(80).optional(),
-})
+export const orderQuerySchema = paginationSchema
+  .extend({
+    q: z.string().trim().max(100).default(''),
+    status: z.enum(orderStatuses).optional(),
+    warehouse: z.string().trim().max(80).optional(),
+    payment: z.enum(paymentStatuses).optional(),
+    fulfillment: z.enum(fulfillmentStatuses).optional(),
+    queue: z.enum(orderQueues).optional(),
+    ...dateFilters,
+  })
+  .refine(validDateRange, { message: 'The end date must be on or after the start date.' })
 export const roleChangeSchema = z.strictObject({ role: roleSchema })
 export const signInSchema = z.strictObject({
   email: z.email().max(254),
@@ -118,26 +126,7 @@ export interface OrderDetail extends OrderSummary {
   reservations: { sku: string; quantity: number; status: ReservationStatus; expiresAt: string }[]
   payment: { provider: string; sessionStarted: boolean; refundStatus: string | null } | null
 }
-export interface WorkspaceSummary {
-  business: { id: string; name: string; currency: string; timezone: string }
-  metrics: {
-    products: number
-    warehouses: number
-    openOrders: number
-    availableUnits: number
-    reservedUnits: number
-    lowStockLevels: number
-  }
-  warehouses: {
-    id: string
-    name: string
-    city: string
-    code: string
-    availableUnits: number
-    reservedUnits: number
-  }[]
-  recentOrders: OrderSummary[]
-}
+export type WorkspaceSummary = import('./operations.js').OperationsOverview
 export interface ApiErrorBody {
   error: { code: string; message: string; requestId: string; fields?: Record<string, string[]> }
 }

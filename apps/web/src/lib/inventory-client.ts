@@ -46,10 +46,17 @@ export function useStockOptions({
   productSearch = '',
   warehouseSearch = '',
   archive = 'all',
-}: { productSearch?: string; warehouseSearch?: string; archive?: 'active' | 'all' } = {}) {
+  enabled = true,
+}: {
+  productSearch?: string
+  warehouseSearch?: string
+  archive?: 'active' | 'all'
+  enabled?: boolean
+} = {}) {
   const { api } = useIdentity()
   const products = useQuery({
     queryKey: ['phase3', 'products', 'options', productSearch, archive],
+    enabled,
     queryFn: () =>
       api<Paginated<ProductRecord>>(
         `/products?pageSize=100&archive=${archive}&q=${encodeURIComponent(productSearch)}`,
@@ -57,6 +64,7 @@ export function useStockOptions({
   })
   const warehouses = useQuery({
     queryKey: ['phase3', 'warehouses', 'options', warehouseSearch, archive],
+    enabled,
     queryFn: () =>
       api<Paginated<WarehouseRecord>>(
         `/warehouses?pageSize=100&archive=${archive}&q=${encodeURIComponent(warehouseSearch)}`,

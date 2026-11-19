@@ -93,6 +93,7 @@ export function createInventoryRouter(db: PrismaClient, businessId: string) {
       low: Prisma.sql`AND b."onHand" - b.reserved > 0 AND b."onHand" - b.reserved <= b.threshold`,
       reserved: Prisma.sql`AND b.reserved > 0`,
       out: Prisma.sql`AND b."onHand" = b.reserved`,
+      attention: Prisma.sql`AND b."onHand" - b.reserved <= b.threshold`,
     }[query.stock]
     const order = {
       product: Prisma.sql`p.name`,

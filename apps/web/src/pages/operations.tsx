@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { useIdentity, useProfile } from '@/lib/identity-context'
 import { timestamp } from '@/lib/inventory-client'
 import { Button } from '@/components/ui/button'
+import { ResourceState } from './phase3-shared'
 import {
   Dialog,
   DialogContent,
@@ -141,9 +142,12 @@ export default function Operations() {
             Loading background tasks…
           </p>
         ) : query.isError ? (
-          <p className="p4-error" role="alert">
-            {query.error.message}
-          </p>
+          <ResourceState
+            error={query.error}
+            retry={() => {
+              void query.refetch()
+            }}
+          />
         ) : !query.data.data.length ? (
           <p className="p3-state">No tasks match this view.</p>
         ) : (

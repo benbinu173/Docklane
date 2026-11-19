@@ -1,95 +1,28 @@
 import { lazy, Suspense } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Route, Routes, useLocation } from 'react-router-dom'
-import { WorkspaceShell } from '@/components/workspace-shell'
-import { DetailPanels } from '@/components/detail-panels'
-import { Button } from '@/components/ui/button'
-import { useWorkspace } from '@/hooks/use-workspace'
+import { useLocation } from 'react-router-dom'
 
-const Overview = lazy(() => import('@/pages/overview'))
-const Inventory = lazy(() => import('@/pages/inventory'))
-const Orders = lazy(() => import('@/pages/orders'))
-const Warehouses = lazy(() =>
-  import('@/pages/supporting').then((module) => ({ default: module.Warehouses })),
-)
-const Payments = lazy(() =>
-  import('@/pages/supporting').then((module) => ({ default: module.Payments })),
-)
-const Activity = lazy(() =>
-  import('@/pages/supporting').then((module) => ({ default: module.Activity })),
-)
-const Settings = lazy(() =>
-  import('@/pages/supporting').then((module) => ({ default: module.Settings })),
-)
-
-function NotFound() {
-  const { go } = useWorkspace()
-  return (
-    <div className="empty-state spacious">
-      <h1>This lane leads elsewhere.</h1>
-      <p>We couldn’t find that page. Your workspace is one click away.</p>
-      <Button className="btn-primary" onClick={() => go('/')}>
-        Return to overview
-      </Button>
-    </div>
-  )
-}
-function Prototype() {
-  const location = useLocation()
-  const reduced = useReducedMotion()
-  return (
-    <WorkspaceShell>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          className="page-content"
-          key={location.pathname}
-          initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: reduced ? 1 : 0 }}
-          transition={{ duration: reduced ? 0 : 0.16 }}
-        >
-          <Suspense
-            fallback={
-              <div className="route-loading" aria-busy="true" aria-label="Opening page">
-                <div className="skeleton short" />
-                <div className="skeleton-panel" />
-              </div>
-            }
-          >
-            <Routes location={location}>
-              <Route path="/" element={<Overview />} />
-              <Route path="/inventory" element={<Inventory />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/warehouses" element={<Warehouses />} />
-              <Route path="/payments" element={<Payments />} />
-              <Route path="/activity" element={<Activity />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </motion.div>
-      </AnimatePresence>
-      <DetailPanels />
-    </WorkspaceShell>
-  )
-}
-
+const Prototype = lazy(() => import('@/pages/prototype-app'))
 const IdentityApp = lazy(() => import('@/pages/identity-app'))
+const Landing = lazy(() => import('@/pages/landing'))
 export default function App() {
   const { pathname } = useLocation()
-  if (/^\/(auth|workspace|account)(\/|$)/.test(pathname))
-    return (
-      <Suspense
-        fallback={
-          <main className="identity-loading">
-            <div role="status">
-              <h1>Opening Docklane…</h1>
-            </div>
-          </main>
-        }
-      >
-        <IdentityApp />
-      </Suspense>
+  const page =
+    pathname === '/welcome' ? (
+      <Landing />
+    ) : /^\/(auth|workspace|account)(\/|$)/.test(pathname) ? (
+      <IdentityApp />
+    ) : (
+      <Prototype />
     )
-  return <Prototype />
+  return (
+    <Suspense
+      fallback={
+        <main className="identity-loading" role="status">
+          Opening Docklane…
+        </main>
+      }
+    >
+      {page}
+    </Suspense>
+  )
 }

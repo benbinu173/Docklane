@@ -1,6 +1,6 @@
 import { Suspense, useState, type ReactNode } from 'react'
 import { Link, Navigate, Outlet, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ArrowRight } from '@phosphor-icons/react/dist/csr/ArrowRight'
 import { ArrowLeft } from '@phosphor-icons/react/dist/csr/ArrowLeft'
@@ -14,7 +14,6 @@ import { List } from '@phosphor-icons/react/dist/csr/List'
 import { Warehouse } from '@phosphor-icons/react/dist/csr/Warehouse'
 import { Cube } from '@phosphor-icons/react/dist/csr/Cube'
 import { Storefront } from '@phosphor-icons/react/dist/csr/Storefront'
-import { CheckCircle } from '@phosphor-icons/react/dist/csr/CheckCircle'
 import { ShoppingBag } from '@phosphor-icons/react/dist/csr/ShoppingBag'
 import { Clock } from '@phosphor-icons/react/dist/csr/Clock'
 import { Button } from '@/components/ui/button'
@@ -29,18 +28,15 @@ import {
 } from '@/components/ui/dialog'
 import { useIdentity, useProfile } from '@/lib/identity-context'
 import { useCart } from '@/lib/cart-context'
+import { QuickSearch } from '@/components/quick-search'
+import { SavedViews } from '@/components/saved-views'
+import { useStockOptions } from '@/lib/inventory-client'
+import { useBoundedRefresh, useDebounced } from '@/lib/operations-client'
 import { OrderReservation } from './order-reservation'
 import { OrderPayment } from './order-payment'
 import { OrderOperations, OrderTimeline } from './order-operations'
 import { ApiError } from '@/lib/auth-client'
-import type {
-  Profile,
-  Role,
-  OrderSummary,
-  OrderDetail,
-  WorkspaceSummary,
-  Paginated,
-} from '@docklane/contracts'
+import type { Profile, Role, OrderSummary, OrderDetail, Paginated } from '@docklane/contracts'
 
 const roleLabels: Record<Role, string> = {
   ADMIN: 'Admin',
@@ -220,6 +216,10 @@ export function ConnectedLayout() {
           Explore the sample workspace
           <ArrowUpRight size={16} />
         </Link>
+        <Link to="/welcome">
+          Meet Docklane
+          <ArrowUpRight size={16} />
+        </Link>
         <p>
           Development accounts and sample payments.
           <br />
@@ -270,6 +270,7 @@ export function ConnectedLayout() {
             </span>
           </div>
           <div>
+            <QuickSearch />
             <span className="connected-role">{roleLabels[profile.role]}</span>
             <span className="connected-avatar" aria-hidden="true">
               {profile.name
@@ -346,119 +347,8 @@ function PageTitle({
     </div>
   )
 }
-export function ConnectedOverview() {
-  const { api } = useIdentity()
-  const query = useQuery({
-    queryKey: ['connected', 'workspace'],
-    queryFn: () => api<{ data: WorkspaceSummary }>('/workspace'),
-  })
-  if (query.isPending) return <Busy />
-  if (query.isError)
-    return (
-      <Failure
-        error={query.error}
-        retry={() => {
-          void query.refetch()
-        }}
-      />
-    )
-  const workspace = query.data.data
-  return (
-    <>
-      <PageTitle
-        title="Your day, moving forward."
-        description={`${workspace.business.name} · A clear view of your saved orders and stock.`}
-        action={
-          <Link className="btn-primary connected-link-button" to="/workspace/orders">
-            View orders
-            <ArrowUpRight size={17} />
-          </Link>
-        }
-      />
-      <div className="connected-metrics">
-        {[
-          ['Open orders', workspace.metrics.openOrders, 'Awaiting payment or fulfillment'],
-          ['Reserved units', workspace.metrics.reservedUnits, 'Allocated to active sample orders'],
-          [
-            'Available stock',
-            workspace.metrics.availableUnits,
-            'On hand, excluding reserved units',
-          ],
-          [
-            'Low-stock levels',
-            workspace.metrics.lowStockLevels,
-            'At or below the reorder threshold',
-          ],
-        ].map(([label, value, note]) => (
-          <div key={label} className={label === 'Low-stock levels' ? 'highlight' : ''}>
-            <span>{label}</span>
-            <strong>{Number(value).toLocaleString('en-IN')}</strong>
-            <small>{note}</small>
-          </div>
-        ))}
-      </div>
-      <section className="panel connected-warehouse-panel">
-        <div className="connected-section-title">
-          <div>
-            <h2>Every place. One connected view.</h2>
-            <p>
-              {workspace.metrics.products} products across {workspace.metrics.warehouses}{' '}
-              warehouses.
-            </p>
-          </div>
-          <Warehouse size={27} weight="duotone" />
-        </div>
-        <div className="connected-sites">
-          {workspace.warehouses.map((warehouse) => (
-            <div key={warehouse.id}>
-              <span className="mono">{warehouse.code}</span>
-              <h3>
-                <Link to={`/workspace/warehouses/${encodeURIComponent(warehouse.id)}`}>
-                  {warehouse.name}
-                  <ArrowUpRight size={14} />
-                </Link>
-              </h3>
-              <p>{warehouse.city}</p>
-              <div>
-                <strong>{warehouse.availableUnits}</strong>
-                <span>available units</span>
-                <strong>{warehouse.reservedUnits}</strong>
-                <span>reserved</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-      <section className="panel connected-orders-panel">
-        <div className="connected-section-title">
-          <div>
-            <h2>Every order has a next move.</h2>
-            <p>Your most recent sample orders, saved in this workspace.</p>
-          </div>
-          <Link to="/workspace/orders" className="text-link">
-            All orders
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-        <OrdersTable orders={workspace.recentOrders} customer={false} />
-      </section>
-      <div className="connected-callout">
-        <CheckCircle size={23} weight="duotone" />
-        <div>
-          <strong>Every count has a story.</strong>
-          <p>
-            Track products across warehouses, correct stock counts, and follow every saved movement.
-          </p>
-        </div>
-        <Link to="/workspace/inventory" className="text-link">
-          Explore inventory
-          <ArrowUpRight size={16} />
-        </Link>
-      </div>
-    </>
-  )
-}
-function OrdersTable({ orders, customer }: { orders: OrderSummary[]; customer: boolean }) {
+export function OrdersTable({ orders, customer }: { orders: OrderSummary[]; customer: boolean }) {
+  const location = useLocation()
   return (
     <div className="table-scroll" role="region" aria-label="Saved orders" tabIndex={0}>
       <table className="data-table connected-orders-table">
@@ -468,6 +358,8 @@ function OrdersTable({ orders, customer }: { orders: OrderSummary[]; customer: b
             {!customer && <th>Customer</th>}
             <th>Status</th>
             <th>Payment</th>
+            <th>Fulfillment</th>
+            {!customer && <th>Warehouse</th>}
             <th>Amount</th>
             <th>Placed</th>
             <th>
@@ -481,7 +373,7 @@ function OrdersTable({ orders, customer }: { orders: OrderSummary[]; customer: b
               <td>
                 <Link
                   className="order-id"
-                  to={`${customer ? '/account' : '/workspace'}/orders/${order.number}`}
+                  to={`${customer ? '/account' : '/workspace'}/orders/${order.number}?back=${encodeURIComponent(location.pathname + location.search)}`}
                   aria-label={`Open order ${order.number}`}
                 >
                   {order.number}
@@ -494,6 +386,10 @@ function OrdersTable({ orders, customer }: { orders: OrderSummary[]; customer: b
               <td>
                 <Badge value={order.paymentStatus} />
               </td>
+              <td>
+                <Badge value={order.fulfillmentStatus} />
+              </td>
+              {!customer && <td>{order.warehouse.name}</td>}
               <td className="numeric">{price(order.totalPaise)}</td>
               <td className="muted">{date(order.createdAt)}</td>
               <td>
@@ -512,9 +408,14 @@ export function ConnectedOrders() {
   const customer = profile.role === 'CUSTOMER'
   const [params, setParams] = useSearchParams()
   const page = Math.max(1, Number(params.get('page')) || 1)
+  const options = useStockOptions({ enabled: !customer })
+  const refresh = useBoundedRefresh()
+  const settledParams = useDebounced(params.toString())
   const query = useQuery({
-    queryKey: ['connected', 'orders', profile.id, params.toString()],
-    queryFn: () => api<Paginated<OrderSummary>>(`/orders?${params}`),
+    queryKey: ['connected', 'orders', profile.id, settledParams],
+    queryFn: () => api<Paginated<OrderSummary>>(`/orders?${settledParams}`),
+    placeholderData: keepPreviousData,
+    refetchInterval: refresh,
   })
   function change(key: string, value: string) {
     const next = new URLSearchParams(params)
@@ -555,11 +456,115 @@ export function ConnectedOrders() {
               ),
             )}
           </select>
+          <select
+            aria-label="Filter saved payment status"
+            value={params.get('payment') ?? ''}
+            onChange={(e) => change('payment', e.target.value)}
+          >
+            <option value="">All payments</option>
+            {[
+              'PENDING',
+              'CAPTURED',
+              'FAILED',
+              'REFUND_PENDING',
+              'PARTIALLY_REFUNDED',
+              'REFUNDED',
+            ].map((value) => (
+              <option key={value} value={value}>
+                {statusLabels[value]}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Filter saved fulfillment status"
+            value={params.get('fulfillment') ?? ''}
+            onChange={(e) => change('fulfillment', e.target.value)}
+          >
+            <option value="">All fulfillment</option>
+            {['UNFULFILLED', 'PACKED', 'SHIPPED'].map((value) => (
+              <option key={value} value={value}>
+                {statusLabels[value]}
+              </option>
+            ))}
+          </select>
+          {!customer && (
+            <select
+              aria-label="Filter saved order warehouse"
+              value={params.get('warehouse') ?? ''}
+              onChange={(e) => change('warehouse', e.target.value)}
+            >
+              <option value="">All warehouses</option>
+              {params.get('warehouse') &&
+                !options.warehouses.data?.data.some((w) => w.id === params.get('warehouse')) && (
+                  <option value={params.get('warehouse')!}>Selected warehouse</option>
+                )}
+              {options.warehouses.data?.data.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <select
+            aria-label="Filter order queue"
+            value={params.get('queue') ?? ''}
+            onChange={(e) => change('queue', e.target.value)}
+          >
+            <option value="">All queues</option>
+            {[
+              ['open', 'Open orders'],
+              ['payment', 'Awaiting payment'],
+              ...(!customer
+                ? [
+                    ['pack', 'Ready to pack'],
+                    ['ship', 'Ready to ship'],
+                  ]
+                : []),
+              ['refund', 'Refunds in progress'],
+              ...(!customer ? [['returns', 'Returns to inspect']] : []),
+            ].map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <label>
+            From
+            <input
+              type="date"
+              aria-label="Order start date"
+              value={params.get('from') ?? ''}
+              onChange={(e) => change('from', e.target.value)}
+            />
+          </label>
+          <label>
+            Through
+            <input
+              type="date"
+              aria-label="Order end date"
+              value={params.get('to') ?? ''}
+              onChange={(e) => change('to', e.target.value)}
+            />
+          </label>
           <span>
             {query.data?.pagination.total ?? '…'}{' '}
             {query.data?.pagination.total === 1 ? 'order' : 'orders'}
           </span>
         </div>
+        <SavedViews kind="orders" />
+        {params.size > 0 && (
+          <div className="p7-active-filters">
+            <span>Filtered view{params.get('queue') ? ` · ${params.get('queue')} queue` : ''}</span>
+            <button className="text-link" onClick={() => setParams({})}>
+              Reset order filters
+            </button>
+          </div>
+        )}
+        {(query.isFetching || settledParams !== params.toString()) && (
+          <p className="p3-updating" role="status">
+            Updating saved orders…
+          </p>
+        )}
         {query.isPending ? (
           <div className="connected-table-loading" role="status">
             Loading your orders…
@@ -636,6 +641,7 @@ export function ConnectedOrderDetail() {
   const { identifier } = useParams()
   const { api } = useIdentity()
   const profile = useProfile().data!.data
+  const [detailParams] = useSearchParams()
   const [openedAt] = useState(() => Date.now())
   const query = useQuery({
     queryKey: ['connected', 'order', profile.id, identifier],
@@ -662,7 +668,19 @@ export function ConnectedOrderDetail() {
     <>
       <Link
         className="text-link connected-back"
-        to={profile.role === 'CUSTOMER' ? '/account/orders' : '/workspace/orders'}
+        to={
+          detailParams
+            .get('back')
+            ?.match(
+              profile.role === 'CUSTOMER'
+                ? /^\/account\/orders(\?|$)/
+                : /^\/workspace(\/orders)?(\?|$)/,
+            )
+            ? detailParams.get('back')!
+            : profile.role === 'CUSTOMER'
+              ? '/account/orders'
+              : '/workspace/orders'
+        }
       >
         <ArrowLeft size={16} />
         All orders

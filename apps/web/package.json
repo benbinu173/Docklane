@@ -1,17 +1,17 @@
 {
   "name": "@docklane/web",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node ../../scripts/prerender-web.mjs",
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
-    "@docklane/contracts": "0.6.0",
+    "@docklane/contracts": "0.7.0",
     "@fontsource/geist": "^5.2.6",
     "@fontsource/geist-mono": "^5.2.6",
     "@neon/auth": "^0.8.2",

@@ -23,17 +23,19 @@ const child = spawn(
       ? 'tests'
       : args.includes('--phase3')
         ? 'tests/phase3.auth.spec.ts'
-        : args.includes('--phase6')
-          ? 'tests/phase6.auth.spec.ts'
-          : args.includes('--phase5')
-            ? 'tests/phase5.auth.spec.ts'
-            : args.includes('--phase4')
-              ? 'tests/phase4.auth.spec.ts'
-              : 'tests/auth.spec.ts',
+        : args.includes('--phase7')
+          ? 'tests/phase7.auth.spec.ts'
+          : args.includes('--phase6')
+            ? 'tests/phase6.auth.spec.ts'
+            : args.includes('--phase5')
+              ? 'tests/phase5.auth.spec.ts'
+              : args.includes('--phase4')
+                ? 'tests/phase4.auth.spec.ts'
+                : 'tests/auth.spec.ts',
     '--workers=1',
     '--reporter=list',
     ...args.filter(
-      (arg) => !['--all', '--phase3', '--phase4', '--phase5', '--phase6'].includes(arg),
+      (arg) => !['--all', '--phase3', '--phase4', '--phase5', '--phase6', '--phase7'].includes(arg),
     ),
   ],
   {

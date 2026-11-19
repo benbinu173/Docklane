@@ -21,7 +21,6 @@ import {
   cancellationSchema,
   type Profile,
   type ApiErrorBody,
-  type WorkspaceSummary,
 } from '@docklane/contracts'
 import type { IdentityVerifier } from './identity.js'
 import { orderInclude, orderSummary, orderDetail } from './orders.js'
@@ -29,6 +28,7 @@ import { signedIn, requirePermission } from './authorization.js'
 import { createInventoryRouter } from './inventory.js'
 import { createResourcesRouter } from './resources.js'
 import { paymentRoutes, stripeWebhook, type PaymentDependencies } from './payments.js'
+import { createOperationsRouter, createdDates, queueWhere } from './operations.js'
 import { fulfillmentRoutes } from './fulfillment.js'
 
 declare global {
@@ -186,53 +186,7 @@ export function createApp({
   app.use('/api/v1', paymentRoutes(db, businessId, payments))
   app.get('/api/v1/me', (request, response) => response.json({ data: signedIn(request) }))
 
-  app.get('/api/v1/workspace', requirePermission('viewWorkspace'), async (_request, response) => {
-    const [business, products, warehouses, openOrders, totals, recentOrders] =
-      await db.$transaction(
-        [
-          db.business.findUniqueOrThrow({
-            where: { id: businessId },
-            select: { id: true, name: true, currency: true, timezone: true },
-          }),
-          db.product.count({ where: { businessId, archived: false } }),
-          db.warehouse.findMany({
-            where: { businessId, archived: false },
-            orderBy: { priority: 'asc' },
-            include: { balances: { select: { onHand: true, reserved: true } } },
-          }),
-          db.order.count({
-            where: { businessId, orderStatus: { in: ['AWAITING_PAYMENT', 'CONFIRMED'] } },
-          }),
-          db.$queryRaw<
-            { availableUnits: number; reservedUnits: number; lowStockLevels: number }[]
-          >`SELECT COALESCE(SUM(b."onHand" - b.reserved), 0)::int AS "availableUnits", COALESCE(SUM(b.reserved), 0)::int AS "reservedUnits", COUNT(*) FILTER (WHERE b."onHand" - b.reserved <= b.threshold)::int AS "lowStockLevels" FROM inventory_balances b JOIN warehouses w ON w.id = b."warehouseId" WHERE w."businessId" = ${businessId} AND w.archived = false`,
-          db.order.findMany({
-            where: { businessId },
-            include: orderInclude,
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-          }),
-        ],
-        { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
-      )
-    const result: WorkspaceSummary = {
-      business,
-      metrics: { products, warehouses: warehouses.length, openOrders, ...totals[0] },
-      warehouses: warehouses.map(({ id, name, city, code, balances }) => ({
-        id,
-        name,
-        city,
-        code,
-        availableUnits: balances.reduce(
-          (sum, balance) => sum + balance.onHand - balance.reserved,
-          0,
-        ),
-        reservedUnits: balances.reduce((sum, balance) => sum + balance.reserved, 0),
-      })),
-      recentOrders: recentOrders.map(orderSummary),
-    }
-    response.json({ data: result })
-  })
+  app.use('/api/v1', createOperationsRouter(db, businessId))
 
   app.get('/api/v1/orders', async (request, response) => {
     const profile = signedIn(request)
@@ -241,6 +195,10 @@ export function createApp({
       businessId,
       ...(profile.role === 'CUSTOMER' ? { customerId: profile.id } : {}),
       ...(query.status ? { orderStatus: query.status } : {}),
+      ...(query.payment ? { paymentStatus: query.payment } : {}),
+      ...(query.fulfillment ? { fulfillmentStatus: query.fulfillment } : {}),
+      ...(createdDates(query) ? { createdAt: createdDates(query) } : {}),
+      AND: [queueWhere(query.queue, db)],
       ...(query.warehouse ? { warehouseId: query.warehouse } : {}),
       ...(query.q
         ? {

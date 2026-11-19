@@ -67,7 +67,7 @@ export const resourceQuerySchema = paginationSchema.extend({
 })
 export const inventoryQuerySchema = resourceQuerySchema.extend({
   warehouse: resourceIdSchema.optional(),
-  stock: z.enum(['all', 'low', 'reserved', 'out']).default('all'),
+  stock: z.enum(['all', 'low', 'reserved', 'out', 'attention']).default('all'),
   sort: z
     .enum(['product', 'warehouse', 'onHand', 'reserved', 'available', 'updated'])
     .default('product'),

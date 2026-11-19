@@ -2,7 +2,7 @@
 
 Created: 18 November 2026, Asia/Kolkata.
 
-Status: Phases 0-5 complete. Stripe sandbox purchases, signed webhooks, automatic expiry, and full late-payment refunds are verified. Phases 6-9 remain planned.
+Status: Phases 0-7 complete. Reservations, Stripe test payments, fulfillment, returns/refunds, connected operations UX, and the public product page are implemented. Phases 8-9 remain planned.
 
 ## Product objective
 
@@ -272,6 +272,8 @@ Depends on: Phase 5. Output: a complete order-to-fulfillment and refund lifecycl
 
 ## Phase 7: Complete UX, operations views, and landing page
 
+Status: complete. See [Phase 7 delivery notes](PHASE_7.md) for the connected briefing, explainable metrics, attention queues, saved views, role-scoped quick search, responsive checks, and product page.
+
 Deliverables:
 
 - Replace all prototype fixtures in operational views with API data; keep an explicit separate preview/demo adapter only if useful.
@@ -358,6 +360,6 @@ Prioritize correctness for stock, money, and authorization. UI fixtures remain c
 
 ## Next implementation task
 
-Phase 6 completes the order-to-fulfillment and refund lifecycle. The next authorized phase can focus on the remaining connected operations UX and landing page in Phase 7. Stripe test credentials and webhook forwarding remain configured. Implementation and correctness checks are recorded in [Phase 6](PHASE_6.md).
+Phase 7 completes the connected operations UX and public product page at /welcome. The next phase is Phase 8: broader correctness, security, recovery, and measured performance verification. See [Phase 7](PHASE_7.md).
 
-The Phase 1 prototype remains separately runnable. Connected stock corrections, order creation, expiry, test payments, packing/shipment, paid cancellation, ordinary refunds, returns, and explicit restocking are implemented. Phase 7 has not started.
+The original sample adapter remains separately available on its existing routes. Connected operations use saved API data. The Neon development branch, stock balances, and original order DL-10023 are preserved. Deployment and portfolio packaging belong to Phase 9.

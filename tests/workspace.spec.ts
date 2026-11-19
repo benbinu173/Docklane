@@ -74,6 +74,7 @@ test('the keyboard command menu opens matching order details and supports deep l
   page,
 }) => {
   await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Your day, in motion.' })).toBeVisible()
   await page.keyboard.press('Control+k')
   await page.getByRole('combobox', { name: 'Search pages, products, and orders' }).fill('Riya Nair')
   await page.keyboard.press('Enter')
