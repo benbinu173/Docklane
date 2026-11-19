@@ -362,6 +362,6 @@ Prioritize correctness for stock, money, and authorization. UI fixtures remain c
 
 ## Next implementation task
 
-Phase 7 completes the connected operations UX and public product page at /welcome. The next phase is Phase 8: broader correctness, security, recovery, and measured performance verification. See [Phase 7](PHASE_7.md).
+Phase 8 completes correctness, security, recovery, and measured performance verification. The next phase is Phase 9: deployment, a guided demo, and portfolio packaging. See [Phase 8](PHASE_8.md) for the verified release candidate and [Phase 9](#phase-9-deployment-demo-and-portfolio-packaging) for the remaining release work.
 
 The original sample adapter remains separately available on its existing routes. Connected operations use saved API data. The Neon development branch, stock balances, and original order DL-10023 are preserved. Deployment and portfolio packaging belong to Phase 9.
