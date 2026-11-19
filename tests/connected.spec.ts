@@ -262,8 +262,8 @@ test('Staff ship a paid order, refund money, and restock only a received return'
   expect(checkoutId).toBeTruthy()
   const payment = await db.payment.findUniqueOrThrow({ where: { orderId: order.id } })
   await command('capture', { orderId: order.id })
-  const operator = await browser.newContext(),
-    admin = await browser.newContext()
+  const operator = await browser.newContext({ reducedMotion: 'reduce' }),
+    admin = await browser.newContext({ reducedMotion: 'reduce' })
   try {
     await session(operator, 'OPERATOR')
     await session(admin, 'ADMIN')
@@ -304,7 +304,10 @@ test('Staff ship a paid order, refund money, and restock only a received return'
     expect((await db.inventoryBalance.findUniqueOrThrow({ where: { id: stockId } })).onHand).toBe(9)
     expect(await db.inventoryMovement.count({ where: { orderId: order.id, type: 'SHIP' } })).toBe(1)
     await page.setViewportSize({ width: 390, height: 844 })
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await page.evaluate(() => document.fonts.ready)
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+      .toBe(true)
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   } finally {
     await operator.close()

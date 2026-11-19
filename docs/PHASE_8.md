@@ -29,25 +29,25 @@ CI enables the connected browser suite with synthetic identity configuration, us
 
 The guarded `npm run benchmark:operations` command creates a unique synthetic business only in loopback `docklane_test`. Its fixture contains 1,000 products, 20 warehouses, 20,000 balances, 5,000 orders, 10,000 order items/reservations, 34,000 movements, 3,000 payments, 1,000 shipments, and 5,000 audits. The fixture ledger reconciles with zero mismatches.
 
-The benchmark uses real loopback HTTP, synthetic identity verification, a Prisma pool of 10, and Docker PostgreSQL 17.12. Hardware: Intel i5-12450H, 12 logical CPUs, 15.7 GiB RAM, Windows, Node 22.16.0. Each route has one initial request and 20 sequential measured requests.
+The benchmark uses real loopback HTTP, synthetic identity verification, a Prisma pool of 10, and Docker PostgreSQL 17.12. Product and warehouse fields pass the application creation schemas; compact stock/site identifiers pass the resource limits. Hardware: Intel i5-12450H, 12 logical CPUs, 15.7 GiB RAM, Windows, Node 22.16.0. Each route has one initial request and 20 sequential measured requests.
 
 | Route/view                      | Median    | p95       | Response bytes | Rows             |
 | ------------------------------- | --------- | --------- | -------------- | ---------------- |
-| Inventory, first page           | 84.98 ms  | 104.40 ms | 15,876         | 20               |
-| Warehouse/category inventory    | 27.39 ms  | 33.86 ms  | 15,835         | 20               |
-| Orders, first page              | 58.98 ms  | 67.62 ms  | 16,439         | 20               |
-| Search for one matching product | 33.13 ms  | 86.58 ms  | 293            | 1                |
-| Operations overview             | 140.30 ms | 153.21 ms | 10,932         | bounded overview |
-| Catalog, first page             | 25.35 ms  | 29.59 ms  | 4,872          | 20               |
-| Catalog categories              | 9.56 ms   | 11.28 ms  | 140            | 10               |
+| Inventory, first page           | 113.96 ms | 125.83 ms | 10,906         | 20               |
+| Warehouse/category inventory    | 44.82 ms  | 51.89 ms  | 10,875         | 20               |
+| Orders, first page              | 87.31 ms  | 97.69 ms  | 14,299         | 20               |
+| Search for one matching product | 50.29 ms  | 57.26 ms  | 185            | 1                |
+| Operations overview             | 200.58 ms | 214.29 ms | 8,987          | bounded overview |
+| Catalog, first page             | 38.79 ms  | 45.50 ms  | 4,152          | 20               |
+| Catalog categories              | 16.28 ms  | 17.64 ms  | 140            | 10               |
 
-`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` showed the catalog stock aggregation scanning about 20,000 balances to return 400 balances for 20 SKUs. The new concurrent `inventory_balances_sku_idx` migration enables a bitmap index lookup. The measured aggregation changed from **3.157 ms to 0.512 ms**. The existing warehouse/SKU uniqueness constraint remains authoritative.
+`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` identified the catalog stock aggregation scanning about 20,000 balances to return 400 balances for 20 SKUs. The new concurrent `inventory_balances_sku_idx` migration enables a bitmap index lookup. On the final validated fixture, the ordinary indexed plan took **0.661 ms**. A comparison of the identical read with index/bitmap scans disabled inside one local transaction took **4.278 ms**, scanning all balances. The planner switches affect only that read transaction; no index is dropped and application settings remain unchanged. The existing warehouse/SKU uniqueness constraint remains authoritative.
 
-Category endpoints now use PostgreSQL `SELECT DISTINCT` rather than transferring every product's category for Prisma to deduplicate in memory. The fixture returns 10 category rows instead of 1,000 product rows. Median category endpoint time changed from 14.00 ms to 9.56 ms; catalog median changed from 34.42 ms to 25.35 ms.
+Category endpoints now use PostgreSQL `SELECT DISTINCT` rather than transferring every product's category for Prisma to deduplicate in memory. The fixture returns 10 category rows instead of 1,000 product rows. Final response timings are shown above; the change bounds database-to-application category transfer by distinct labels.
 
-Existing order/business/date and customer/date indexes already support the measured first-page/history queries: final plan execution was 0.200 ms and 0.081 ms. No additional order or text-search indexes were added. Broad inventory totals still scan the scoped balances; the final inventory page plan took 25.4 ms. Larger datasets should be measured again before changing that query shape.
+Existing order/business/date and customer/date indexes already support the measured first-page/history queries: final plan execution was 0.186 ms and 0.173 ms. No additional order or text-search indexes were added. Broad inventory totals still scan the scoped balances; the final inventory page plan took 34.268 ms. Larger datasets should be measured again before changing that query shape.
 
-These are small local samples, not a hosted throughput claim. Baseline and final runs use separate fixtures with identical counts/distributions; integration tests reset the isolated database between runs. Local scheduling and warm caches affect timings. Measurements exclude cloud identity, Stripe, internet latency, and hosting cold starts. SQL plans and full reports are saved under ignored `.local/phase8-operations-*.json`.
+These are small local samples, not a hosted throughput claim. Local scheduling and warm caches affect timings. Measurements exclude cloud identity, Stripe, internet latency, and hosting cold starts. The index-plan comparison uses the same validated fixture and SQL read. Earlier exploratory fixtures used oversized identifiers and are superseded by `.local/phase8-operations-validated.json`; they are excluded from the final measurements. SQL plans and full reports remain ignored.
 
 ```sh
 npm run db:test:migrate
@@ -78,7 +78,7 @@ The lockfile dependency audit currently reports zero advisories. Historical Phas
 
 ## Verification commands
 
-Validation passed **139 distinct automated checks**: eight domain, 103 PostgreSQL/API, and 28 production browser tests. The browser count includes a focused rerun after making the final accessibility scan wait for the restored order timeline. Formatting, lint, full type checking, and all workspace builds pass. The separate concurrency proof again produced exactly 10 reservations and 40 insufficient-stock responses, then released its holds and reconciled the ledger.
+Validation passed **139 distinct automated checks**: eight domain, 103 PostgreSQL/API, and 28 production browser tests. The browser count includes focused reruns after making the final scan wait for the restored timeline, loaded fonts, and settled mobile layout. Formatting, lint, full type checking, and all workspace builds pass. The separate concurrency proof again produced exactly 10 reservations and 40 insufficient-stock responses, then released its holds and reconciled the ledger.
 
 All **81 original development balances**, including quantities and versions, and **DL-10023** remain unchanged. Four additional browser fixture balances were cleared and archived. The SKU index migration was tested against the representative dataset and applied through the supplied direct development connection. No live payment or deployment occurred. Private accounts, configuration, diagnostics, and reports remain ignored.
 

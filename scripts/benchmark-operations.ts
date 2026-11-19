@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto'
+import { randomUUID, createHash } from 'node:crypto'
 import { performance } from 'node:perf_hooks'
 import { cpus, totalmem, platform } from 'node:os'
 import { writeFile, mkdir } from 'node:fs/promises'
@@ -6,6 +6,7 @@ import { config } from 'dotenv'
 import { createDatabase, Prisma } from '@docklane/database'
 import { createApp } from '../apps/api/src/app.js'
 import { DomainError } from '@docklane/domain'
+import { productCreateSchema, warehouseCreateSchema, resourceIdSchema } from '@docklane/contracts'
 
 config({ path: ['.env.local', '.env'], quiet: true })
 const url = process.env.TEST_DATABASE_URL
@@ -27,8 +28,13 @@ if (!/^[a-z0-9-]{1,30}$/.test(label))
 const businessId = reused ?? `benchmark-${randomUUID()}`
 const db = createDatabase(url)
 const now = Date.now()
-const sku = (index: number) => `${businessId}-SKU-${String(index).padStart(4, '0')}`
-const warehouse = (index: number) => `${businessId}-W-${String(index).padStart(2, '0')}`
+const fixturePrefix = createHash('sha256')
+  .update(businessId)
+  .digest('hex')
+  .slice(0, 8)
+  .toUpperCase()
+const sku = (index: number) => `BENCH-${fixturePrefix}-${String(index).padStart(4, '0')}`
+const warehouse = (index: number) => `SITE-${fixturePrefix}-${String(index).padStart(2, '0')}`
 const balanceId = (product: string, site: string) => `${product}@${site}`
 async function batches<T>(rows: T[], save: (chunk: T[]) => Promise<unknown>) {
   for (let offset = 0; offset < rows.length; offset += 400)
@@ -62,24 +68,28 @@ async function loadFixture(db: Prisma.TransactionClient) {
   })
   await db.product.createMany({
     data: Array.from({ length: 1000 }, (_, index) => ({
-      sku: sku(index),
-      name: `Benchmark product ${String(index).padStart(4, '0')}`,
-      category: `Category ${index % 10}`,
-      pricePaise: 12500,
-      image: '/product-placeholder.svg',
-      color: '#E9EEE4',
+      ...productCreateSchema.parse({
+        sku: sku(index),
+        name: `Benchmark product ${String(index).padStart(4, '0')}`,
+        category: `Category ${index % 10}`,
+        pricePaise: 12500,
+        image: '/product-placeholder.svg',
+        color: '#E9EEE4',
+      }),
       businessId,
     })),
   })
   await db.warehouse.createMany({
     data: Array.from({ length: 20 }, (_, index) => ({
-      id: warehouse(index),
-      code: `${businessId}-${index}`,
-      name: `Benchmark warehouse ${index}`,
-      city: 'Kochi',
-      address: 'Synthetic benchmark site',
-      lead: 'Benchmark operator',
-      priority: index,
+      ...warehouseCreateSchema.parse({
+        code: `W-${fixturePrefix}-${String(index).padStart(2, '0')}`,
+        name: `Benchmark warehouse ${index}`,
+        city: 'Kochi',
+        address: 'Synthetic benchmark site',
+        lead: 'Benchmark operator',
+        priority: index,
+      }),
+      id: resourceIdSchema.parse(warehouse(index)),
       businessId,
     })),
   })
@@ -87,7 +97,7 @@ async function loadFixture(db: Prisma.TransactionClient) {
   const movements: Prisma.InventoryMovementCreateManyInput[] = []
   for (let site = 0; site < 20; site++)
     for (let product = 0; product < 1000; product++) {
-      const id = balanceId(sku(product), warehouse(site))
+      const id = resourceIdSchema.parse(balanceId(sku(product), warehouse(site)))
       balances.set(id, {
         id,
         sku: sku(product),
@@ -250,6 +260,17 @@ const quantile = (values: number[], fraction: number) =>
   Number([...values].sort((a, b) => a - b)[Math.ceil(values.length * fraction) - 1].toFixed(2))
 try {
   if (!reused) await db.$transaction(loadFixture, { timeout: 120_000 })
+  if (
+    (await db.product.count({
+      where: { businessId, sku: { startsWith: `BENCH-${fixturePrefix}-` } },
+    })) !== 1000 ||
+    (await db.warehouse.count({
+      where: { businessId, id: { startsWith: `SITE-${fixturePrefix}-` } },
+    })) !== 20
+  )
+    throw new Error(
+      'This fixture does not match the validated benchmark format. Start a new benchmark.',
+    )
   const profile = await db.userProfile.findUniqueOrThrow({
     where: { authSubject: `${businessId}:admin` },
   })
@@ -336,7 +357,7 @@ try {
         rows = Array.isArray(data) ? data.length : null
       }
       measurements.push({
-        route: route.replaceAll(businessId, 'fixture'),
+        route: route.replaceAll(warehouse(0), 'fixture-W-00'),
         coldMs: Number(times[0].toFixed(2)),
         p50Ms: quantile(times.slice(1), 0.5),
         p95Ms: quantile(times.slice(1), 0.95),
@@ -360,8 +381,18 @@ try {
   for (const [name, query] of Object.entries(planQueries))
     plans[name] = await db.$queryRaw(Prisma.sql`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${query}`)
   const version = await db.$queryRaw<{ version: string }[]>`SELECT version()`
+  // The comparison changes only this transaction's planner settings. It does
+  // not drop an index or alter the settings used by ordinary application reads.
+  plans.catalogBalancesSequential = await db.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe('SET LOCAL enable_indexscan = off')
+    await tx.$executeRawUnsafe('SET LOCAL enable_bitmapscan = off')
+    return tx.$queryRaw(
+      Prisma.sql`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${planQueries.catalogBalances}`,
+    )
+  })
   const report = {
     measuredAt: new Date().toISOString(),
+    schemaValidated: true,
     fixture: businessId,
     dataset: {
       products: 1000,
