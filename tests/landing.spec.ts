@@ -22,10 +22,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(
         'Every order.Moving forward.',
       )
-      await page.evaluate(async () => {
-        await document.fonts.ready
-        await Promise.all(Array.from(document.images).map((i) => i.decode().catch(() => null)))
-      })
+      await page.evaluate(() => document.fonts.ready)
+      // Exercise lazy images in their real viewport before checking the whole page.
+      for (const image of await page.locator('img').all()) {
+        await image.scrollIntoViewIfNeeded()
+        await image.evaluate((element) => (element as HTMLImageElement).decode().catch(() => null))
+      }
+      await page.evaluate(() => scrollTo(0, 0))
       const result = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
         .analyze()

@@ -2,7 +2,7 @@
 
 Created: 18 November 2026, Asia/Kolkata.
 
-Status: Phases 0-8 complete. Docklane is a verified release candidate. Phase 9 deployment, demo, and portfolio packaging remains planned.
+Status: Phases 0-8 complete. Docklane is a verified release candidate. Phase 9 deployment, demo, and portfolio packaging is in progress; see [release preparation](PHASE_9.md).
 
 ## Product objective
 
@@ -318,6 +318,8 @@ Completion checks:
 Depends on: Phase 7. Output: a release candidate with evidence supporting its reliability.
 
 ## Phase 9: Deployment, demo, and portfolio packaging
+
+Status: in progress. Hosting configuration, demo/bootstrap guards, release documentation and artifact tooling are prepared. Workspace/hosting approval and hosted verification remain pending; see [Phase 9](PHASE_9.md).
 
 Deliverables:
 

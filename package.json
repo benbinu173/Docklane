@@ -34,7 +34,15 @@
     "benchmark:operations": "tsx scripts/benchmark-operations.ts",
     "prove:concurrency": "tsx scripts/prove-concurrency.ts",
     "dev:worker": "npm run db:generate && npm run build:packages && npm run dev --workspace @docklane/worker",
-    "start:worker": "npm run start --workspace @docklane/worker"
+    "start:worker": "npm run start --workspace @docklane/worker",
+    "deploy:build:web": "node scripts/check-deployment.mjs web && npm run build --workspace @docklane/contracts && npm run build --workspace @docklane/web",
+    "deploy:build:backend": "npm run db:generate && npm run build:packages && npm run build --workspace @docklane/api && npm run build --workspace @docklane/worker",
+    "deploy:check:api": "node scripts/check-deployment.mjs api",
+    "deploy:start:api": "npm run deploy:check:api && npm run start --workspace @docklane/api",
+    "deploy:start:worker": "node scripts/check-deployment.mjs worker && npm run start --workspace @docklane/worker",
+    "demo:bootstrap": "tsx scripts/demo-bootstrap.ts",
+    "backup:rehearse": "node scripts/backup-rehearsal.mjs",
+    "capture:release": "node scripts/capture-release.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
@@ -49,9 +57,15 @@
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vitest": "4.1.12"
+    "vitest": "4.1.12",
+    "prisma": "7.10.1"
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "overrides": {
+    "@prisma/config": {
+      "effect": "3.22.1"
+    }
   }
 }

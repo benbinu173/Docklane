@@ -3,6 +3,9 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { ArrowUpRight } from '@phosphor-icons/react/dist/csr/ArrowUpRight'
 import { ArrowClockwise } from '@phosphor-icons/react/dist/csr/ArrowClockwise'
 import { Package } from '@phosphor-icons/react/dist/csr/Package'
+import { Clock } from '@phosphor-icons/react/dist/csr/Clock'
+import { Truck } from '@phosphor-icons/react/dist/csr/Truck'
+import { FulfillmentBoard } from '@/components/fulfillment-board'
 import { useIdentity } from '@/lib/identity-context'
 import { useStockOptions, money, timestamp } from '@/lib/inventory-client'
 import { useBoundedRefresh } from '@/lib/operations-client'
@@ -194,6 +197,40 @@ export default function ConnectedOverview() {
                 </Link>
               ))}
             </div>
+            <FulfillmentBoard
+              title="Every order has a next move."
+              description="The current fulfillment queues for orders in this view."
+              lanes={[
+                {
+                  id: 'payment',
+                  label: 'Awaiting payment',
+                  note: 'Stock held for checkout',
+                  count: data.queues.payment,
+                  icon: Clock,
+                  href: orderLink({ queue: 'payment' }),
+                },
+                {
+                  id: 'pack',
+                  label: 'Ready to pack',
+                  note: 'Paid and ready for preparation',
+                  count: data.queues.pack,
+                  icon: Package,
+                  href: orderLink({ queue: 'pack' }),
+                  priority: true,
+                },
+                {
+                  id: 'ship',
+                  label: 'Ready to ship',
+                  note: 'Packed and waiting for dispatch',
+                  count: data.queues.ship,
+                  icon: Truck,
+                  href: orderLink({ queue: 'ship' }),
+                  priority: true,
+                },
+              ]}
+              note="Saved order states. Open a queue to review its next action."
+              href={orderLink({})}
+            />
             <div className="p7-operations-grid">
               <section className="panel p7-attention">
                 <div className="connected-section-title">

@@ -74,7 +74,7 @@ The build now explicitly selects `NODE_ENV=production` for Vite and prerendering
 
 The final local mobile Lighthouse run also scored 100 best practices and 92 SEO, with 2.1-second speed index. Lighthouse 12.8.2 used local production preview and Playwright Chromium's mobile throttling. These single-run scores are diagnostic measurements. Ordinary/reduced-motion hydration and styled readability with JavaScript disabled passed. Preserve the static `/welcome` host-routing requirement in the [Phase 7 notes](PHASE_7.md).
 
-The lockfile dependency audit currently reports zero advisories. Historical Phase 2 dependency findings describe that phase's audit rather than the current result.
+The lockfile dependency audit reported zero advisories during Phase 8 verification. A subsequent 20 November 2026 audit found three high findings in the Prisma/Effect chain ([GHSA-7589-6fvf-x4pw](https://github.com/advisories/GHSA-7589-6fvf-x4pw)). Phase 9 preparation resolved these using a scoped Effect 3.22.1 patch and root Prisma tooling; clean installation, working Prisma/deployment builds, and a full zero-finding audit passed. See the [Phase 9 record](PHASE_9.md). Historical findings describe their dated audit results.
 
 ## Verification commands
 

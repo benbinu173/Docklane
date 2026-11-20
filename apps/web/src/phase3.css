@@ -12,7 +12,7 @@
 }
 .p3-state p,
 .p3-empty p {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 13px;
   line-height: 1.8;
   max-width: 460px;
@@ -22,17 +22,17 @@
   letter-spacing: -0.6px;
 }
 .p3-footnote {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
   line-height: 1.8;
   margin: 17px 2px 25px;
 }
 .p3-updating {
   padding: 10px 22px;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
-  border-bottom: 1px solid #d9e0e7;
-  background: #f5f8ef;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-accent);
 }
 .p3-filters {
   display: flex;
@@ -40,7 +40,7 @@
   align-items: center;
   gap: 10px;
   padding: 19px 22px;
-  border-bottom: 1px solid #d9e0e7;
+  border-bottom: 1px solid var(--border);
 }
 .p3-filters input {
   flex: 1 1 200px;
@@ -51,12 +51,12 @@
 .p3-filters select,
 .p3-form select {
   min-height: 44px;
-  background: #fff;
-  border: 1px solid #d9e0e7;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0 30px 0 12px;
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
   max-width: 100%;
 }
 .p3-filters .text-link {
@@ -71,8 +71,8 @@
   gap: 16px;
   padding: 18px 22px;
   font-size: 11px;
-  color: #526173;
-  border-top: 1px solid #d9e0e7;
+  color: var(--muted-foreground);
+  border-top: 1px solid var(--border);
 }
 .p3-pagination > div {
   display: flex;
@@ -87,8 +87,8 @@
   display: flex;
   gap: 18px;
   align-items: center;
-  background: #e9efe3;
-  border: 1px solid #d8e3ce;
+  background: var(--surface-accent);
+  border: 1px solid var(--border-accent);
   border-radius: 14px;
   padding: 25px 28px;
   margin-bottom: 24px;
@@ -98,12 +98,12 @@
   flex-shrink: 0;
   width: 54px;
   height: 54px;
-  border: 1px solid #ccdbc1;
-  background: #f8fbf3;
+  border: 1px solid var(--border-accent);
+  background: var(--surface-muted);
   border-radius: 12px;
   display: grid;
   place-items: center;
-  color: #415c2e;
+  color: var(--accent-foreground);
 }
 .p3-stock-summary > div > strong {
   font-size: 18px;
@@ -112,7 +112,7 @@
 }
 .p3-stock-summary p {
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 7px;
   line-height: 1.7;
 }
@@ -126,7 +126,7 @@
 .p3-site-detail dt,
 .p3-warehouse-list dt {
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-bottom: 6px;
 }
 .p3-stock-summary dd,
@@ -147,7 +147,7 @@
   display: flex;
   gap: 22px;
   align-items: center;
-  border-bottom: 1px solid #d9e0e7;
+  border-bottom: 1px solid var(--border);
   padding: 0 22px;
   overflow-x: auto;
 }
@@ -157,23 +157,24 @@
   align-items: center;
   white-space: nowrap;
   min-height: 60px;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 12px;
   border-bottom: 2px solid transparent;
 }
 .p3-tabs > button.active {
-  color: #101d2c;
-  border-bottom-color: #101d2c;
+  color: var(--foreground);
+  border-bottom-color: var(--border-strong);
   font-weight: 600;
 }
 .p3-tabs > button span {
-  background: #eef2f5;
+  background: var(--surface-muted);
   padding: 3px 6px;
   border-radius: 4px;
   font-size: 10px;
 }
 .p3-tabs > button.active span {
-  background: #b9f36b;
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 .p3-inventory-table {
   min-width: 850px;
@@ -196,7 +197,7 @@
 }
 .p3-inventory-table th button span {
   font-size: 13px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .p3-inventory-table td > strong,
 .p3-inventory-table td > small {
@@ -204,7 +205,7 @@
 }
 .p3-inventory-table td > small {
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 5px;
 }
 .p3-product-open,
@@ -221,7 +222,7 @@
   height: 46px;
   border-radius: 9px;
   object-fit: cover;
-  background: #edf2e8;
+  background: var(--surface-accent);
   flex-shrink: 0;
 }
 .p3-product-open strong,
@@ -236,11 +237,11 @@
   display: block;
   margin-top: 5px;
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .p3-product-open svg {
   margin-left: 6px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .p3-product-open:hover strong,
 a.p3-product-cell:hover strong {
@@ -249,7 +250,7 @@ a.p3-product-cell:hover strong {
 }
 .p3-available {
   font-weight: 600;
-  color: #216e46;
+  color: var(--success);
 }
 .p3-form {
   font-size: 13px;
@@ -266,7 +267,7 @@ a.p3-product-cell:hover strong {
   display: flex;
   flex-direction: column;
   gap: 9px;
-  color: #101d2c;
+  color: var(--foreground);
   font-size: 12px;
   font-weight: 500;
   min-width: 0;
@@ -278,12 +279,12 @@ a.p3-product-cell:hover strong {
   font-size: 13px;
 }
 .p3-form input[readonly] {
-  color: #526173;
-  background: #f4f6f8;
+  color: var(--muted-foreground);
+  background: var(--background);
 }
 .p3-form input[type='color'] {
   height: 44px;
-  border: 1px solid #d9e0e7;
+  border: 1px solid var(--border);
   padding: 5px;
   border-radius: 8px;
 }
@@ -294,7 +295,7 @@ a.p3-product-cell:hover strong {
 }
 .p3-form-note {
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
   line-height: 1.8;
 }
 .p3-form-actions {
@@ -327,15 +328,15 @@ a.p3-product-cell:hover strong {
 }
 .p3-editor [data-slot='dialog-description'] {
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
   line-height: 1.8;
 }
 .p3-danger-button {
-  background: #b42318;
+  background: var(--danger-background);
   color: #fff;
 }
 .p3-danger-button:hover {
-  background: #921c14;
+  background: var(--danger-hover);
 }
 .p3-drawer[data-slot='dialog-content'] {
   inset: 0 0 0 auto;
@@ -344,7 +345,7 @@ a.p3-product-cell:hover strong {
   height: 100dvh;
   max-height: 100dvh;
   border: 0;
-  border-left: 1px solid #d9e0e7;
+  border-left: 1px solid var(--border);
   border-radius: 0;
   padding: 0;
   display: flex;
@@ -354,7 +355,7 @@ a.p3-product-cell:hover strong {
 }
 .p3-drawer-header {
   padding: 30px 28px 24px;
-  border-bottom: 1px solid #d9e0e7;
+  border-bottom: 1px solid var(--border);
   text-align: left;
 }
 .p3-drawer-header .auth-eyebrow {
@@ -368,7 +369,7 @@ a.p3-product-cell:hover strong {
   padding-right: 15px;
 }
 .p3-drawer-header [data-slot='dialog-description'] {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 12px;
   line-height: 1.8;
 }
@@ -387,32 +388,32 @@ a.p3-product-cell:hover strong {
   height: 65px;
   border-radius: 12px;
   object-fit: cover;
-  background: #edf2e8;
+  background: var(--surface-accent);
 }
 .p3-drawer-product p {
   margin-top: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 10px;
 }
 .p3-stock-counts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 25px 0 30px;
-  border: 1px solid #d9e0e7;
+  border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
 }
 .p3-stock-counts > div {
   padding: 20px 16px;
-  border-right: 1px solid #d9e0e7;
+  border-right: 1px solid var(--border);
 }
 .p3-stock-counts > div:last-child {
-  background: #eef5e5;
+  background: var(--surface-accent);
   border: 0;
 }
 .p3-stock-counts dt {
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .p3-stock-counts dd {
   margin: 8px 0 0;
@@ -430,7 +431,7 @@ a.p3-product-cell:hover strong {
 }
 .p3-adjustment > p,
 .p3-threshold > p {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 12px;
   line-height: 1.8;
   margin: 10px 0 21px;
@@ -443,7 +444,7 @@ a.p3-product-cell:hover strong {
   gap: 9px;
 }
 .p3-protected span {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
 }
 .p3-protected strong {
@@ -452,8 +453,8 @@ a.p3-product-cell:hover strong {
 }
 .p3-review {
   padding: 22px;
-  background: #f2f6ec;
-  border: 1px solid #d5e2c9;
+  background: var(--surface-accent);
+  border: 1px solid var(--border-accent);
   border-radius: 10px;
 }
 .p3-review .auth-eyebrow {
@@ -469,10 +470,10 @@ a.p3-product-cell:hover strong {
   letter-spacing: -1px;
 }
 .p3-count-change strong:first-child {
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .p3-count-change small {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
 }
 .p3-review > p {
@@ -482,7 +483,7 @@ a.p3-product-cell:hover strong {
   overflow-wrap: anywhere;
 }
 .p3-review > small {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
 }
 .p3-review .p3-form-actions {
@@ -494,8 +495,8 @@ a.p3-product-cell:hover strong {
 .p3-threshold {
   margin: 28px 0;
   padding: 20px 0;
-  border-top: 1px solid #d9e0e7;
-  border-bottom: 1px solid #d9e0e7;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 .p3-threshold summary {
   cursor: pointer;
@@ -505,7 +506,7 @@ a.p3-product-cell:hover strong {
 .p3-threshold summary span {
   float: right;
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .p3-threshold > p {
   margin-top: 17px;
@@ -519,7 +520,7 @@ a.p3-product-cell:hover strong {
 }
 .p3-history > div:first-child > span {
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
   white-space: nowrap;
 }
 .p3-history ol {
@@ -537,7 +538,7 @@ a.p3-product-cell:hover strong {
   content: '';
   position: absolute;
   width: 1px;
-  background: #d9e0e7;
+  background: var(--border-strong);
   top: 8px;
   bottom: -8px;
   left: 5px;
@@ -546,8 +547,8 @@ a.p3-product-cell:hover strong {
   flex-shrink: 0;
   width: 11px;
   height: 11px;
-  background: #e6f5d9;
-  border: 2px solid #648b43;
+  background: var(--accent-foreground);
+  border: 2px solid var(--border-accent);
   border-radius: 50%;
   margin-top: 4px;
   z-index: 1;
@@ -569,8 +570,8 @@ a.p3-product-cell:hover strong {
 }
 .p3-history-title span {
   font-size: 10px;
-  background: #edf2e8;
-  color: #216e46;
+  background: var(--surface-accent);
+  color: var(--success);
   padding: 4px 6px;
   border-radius: 4px;
 }
@@ -582,14 +583,14 @@ a.p3-product-cell:hover strong {
 }
 .p3-history li small {
   display: block;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 10px;
   line-height: 1.7;
 }
 .p3-history-balance {
   display: block;
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 9px;
 }
 .p3-history-pager {
@@ -597,7 +598,7 @@ a.p3-product-cell:hover strong {
   align-items: center;
   justify-content: space-between;
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
   gap: 12px;
 }
 .p3-catalog-intro {
@@ -605,14 +606,14 @@ a.p3-product-cell:hover strong {
   gap: 23px;
   align-items: center;
   padding: 27px 28px;
-  background: #e9efe3;
-  border: 1px solid #d8e3ce;
+  background: var(--surface-accent);
+  border: 1px solid var(--border-accent);
   border-radius: 14px;
   margin-bottom: 25px;
 }
 .p3-catalog-intro > svg {
   flex-shrink: 0;
-  color: #415c2e;
+  color: var(--accent-foreground);
 }
 .p3-catalog-intro .auth-eyebrow {
   font-size: 9px;
@@ -625,7 +626,7 @@ a.p3-product-cell:hover strong {
 }
 .p3-catalog-intro p {
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 10px;
   line-height: 1.8;
 }
@@ -646,7 +647,7 @@ a.p3-product-cell:hover strong {
   min-height: 40px;
 }
 .p3-row-actions .muted {
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .p3-network {
   background: #101d2c;
@@ -773,7 +774,7 @@ a.p3-product-cell:hover strong {
   align-items: center;
   gap: 20px;
   padding: 28px 24px;
-  border-bottom: 1px solid #d9e0e7;
+  border-bottom: 1px solid var(--border);
 }
 .p3-warehouse-list > article:last-child {
   border-bottom: 0;
@@ -799,7 +800,7 @@ a.p3-product-cell:hover strong {
   text-underline-offset: 4px;
 }
 .p3-site-name p {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
   margin-top: 8px;
 }
@@ -828,8 +829,8 @@ a.p3-product-cell:hover strong {
   gap: 22px;
   align-items: center;
   padding: 28px;
-  background: #e9efe3;
-  border: 1px solid #d8e3ce;
+  background: var(--surface-accent);
+  border: 1px solid var(--border-accent);
   border-radius: 14px;
   margin-bottom: 25px;
 }
@@ -849,14 +850,14 @@ a.p3-product-cell:hover strong {
 .p3-site-detail small {
   display: block;
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
   line-height: 1.8;
   margin-top: 8px;
 }
 .p3-shop-intro {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
-  background: #e9efe3;
+  background: var(--surface-accent);
   border-radius: 14px;
   overflow: hidden;
   margin-bottom: 40px;
@@ -874,7 +875,7 @@ a.p3-product-cell:hover strong {
   font-size: 13px;
   line-height: 1.85;
   max-width: 330px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 20px;
 }
 .p3-shop-note {
@@ -933,7 +934,7 @@ a.p3-product-cell:hover strong {
 .p3-shop-tools input {
   max-width: 270px;
   height: 44px;
-  background: white;
+  background: var(--surface);
   font-size: 12px;
 }
 .p3-shop-categories {
@@ -944,17 +945,17 @@ a.p3-product-cell:hover strong {
 }
 .p3-shop-categories button {
   padding: 11px 15px;
-  border: 1px solid #d9e0e7;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 12px;
-  background: #fff;
+  background: var(--surface);
   min-height: 44px;
 }
 .p3-shop-categories button.active {
-  border-color: #101d2c;
-  background: #101d2c;
-  color: #fff;
+  border-color: var(--border-strong);
+  background: var(--foreground);
+  color: var(--background);
 }
 .p3-shop-categories button.text-link {
   background: none;
@@ -992,8 +993,8 @@ a.p3-product-cell:hover strong {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: white;
-  color: #101d2c;
+  background: var(--surface);
+  color: var(--foreground);
   bottom: 12px;
   right: 12px;
   transition: transform 180ms ease;
@@ -1005,15 +1006,15 @@ a.p3-product-cell:hover strong {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: white;
-  color: #526173;
+  background: var(--surface);
+  color: var(--muted-foreground);
   padding: 6px 8px;
   font-size: 9px;
   border-radius: 4px;
 }
 .p3-shop-category {
   display: block;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 10px;
   margin-top: 17px;
 }
@@ -1035,7 +1036,7 @@ a.p3-product-cell:hover strong {
 }
 .p3-shop-product > small {
   display: block;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 10px;
   line-height: 1.7;
   margin-top: 8px;
@@ -1074,20 +1075,20 @@ a.p3-product-cell:hover strong {
 .p3-detail-copy > p {
   font-size: 13px;
   line-height: 1.8;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 24px;
 }
 .p3-ordering-note {
   display: flex;
   gap: 16px;
   padding: 22px 0;
-  border-top: 1px solid #d9e0e7;
-  border-bottom: 1px solid #d9e0e7;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   margin: 27px 0;
 }
 .p3-ordering-note > svg {
   flex-shrink: 0;
-  color: #415c2e;
+  color: var(--accent-foreground);
 }
 .p3-ordering-note h2 {
   font-size: 15px;
@@ -1096,12 +1097,12 @@ a.p3-product-cell:hover strong {
 .p3-ordering-note p {
   font-size: 12px;
   line-height: 1.9;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 10px;
 }
 .p3-detail-copy > small {
   display: block;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 10px;
   margin-top: 40px;
 }
@@ -1116,7 +1117,7 @@ a.p3-product-cell:hover strong {
 .p3-filters select:focus-visible,
 .p3-form select:focus-visible,
 .p3-form input[type='color']:focus-visible {
-  outline: 2px solid #101d2c;
+  outline: 2px solid var(--border-strong);
   outline-offset: 3px;
 }
 .p3-network a:focus-visible {
@@ -1131,13 +1132,13 @@ a.p3-product-cell:hover strong {
   margin-top: 7px;
   border-radius: 2px;
   overflow: hidden;
-  background: #d9e0e7;
+  background: var(--border-strong);
 }
 .p3-stock-bar > span:first-child {
-  background: #507a32;
+  background: var(--stock-available);
 }
 .p3-stock-bar > span:last-child {
-  background: #8d98a5;
+  background: var(--stock-reserved);
 }
 @keyframes p3-drawer-enter {
   from {
@@ -1151,7 +1152,7 @@ a.p3-product-cell:hover strong {
 }
 @keyframes p3-count-confirm {
   from {
-    background-color: #d7efb9;
+    background-color: var(--surface-accent);
   }
   to {
     background-color: transparent;

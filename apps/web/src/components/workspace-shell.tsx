@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { NavigationHighlight, NavigationSurface } from '@/components/navigation-motion'
+import { ThemeToggle } from '@/components/theme-controls'
 import { Command as CommandMenu } from 'cmdk'
 import { ArrowCounterClockwise } from '@phosphor-icons/react/dist/csr/ArrowCounterClockwise'
 import { ArrowRight } from '@phosphor-icons/react/dist/csr/ArrowRight'
@@ -169,7 +171,7 @@ function Sidebar({ close }: { close?: () => void }) {
         </span>
       </div>
       <p className="nav-label">WORKSPACE</p>
-      <nav aria-label="Main navigation">
+      <NavigationSurface label="Main navigation">
         {navigation.map(({ path, label, icon: Icon }) => (
           <button
             key={path}
@@ -180,12 +182,13 @@ function Sidebar({ close }: { close?: () => void }) {
               close?.()
             }}
           >
+            {location.pathname === path && <NavigationHighlight />}
             <Icon size={20} weight={location.pathname === path ? 'fill' : 'regular'} />
             <span>{label}</span>
             {path === '/orders' && <span className="nav-count">{openOrders}</span>}
           </button>
         ))}
-      </nav>
+      </NavigationSurface>
       <div className="sidebar-bottom">
         <Link
           className="guide-button prototype-signin"
@@ -399,6 +402,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
               <kbd aria-hidden="true">⌘ K</kbd>
             </button>
             <div className="topbar-separator" />
+            <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button

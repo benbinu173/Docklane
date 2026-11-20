@@ -8,6 +8,7 @@ import { EyeSlash } from '@phosphor-icons/react/dist/csr/EyeSlash'
 import { CheckCircle } from '@phosphor-icons/react/dist/csr/CheckCircle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { ThemeToggle } from '@/components/theme-controls'
 import { signInSchema, signUpSchema } from '@docklane/contracts'
 import { useIdentity, useProfile } from '@/lib/identity-context'
 import { authClient } from '@/lib/auth-client'
@@ -165,10 +166,13 @@ export function Authentication() {
         </div>
       </aside>
       <main className="auth-main">
-        <Link to="/" className="auth-back">
-          <ArrowLeft size={17} />
-          Explore the sample workspace
-        </Link>
+        <div className="auth-topline">
+          <Link to="/" className="auth-back">
+            <ArrowLeft size={17} />
+            Explore the sample workspace
+          </Link>
+          <ThemeToggle />
+        </div>
         <motion.div
           className="auth-form-content"
           key={view}

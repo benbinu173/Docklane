@@ -11,7 +11,7 @@
 }
 .p6-section-head > svg {
   flex-shrink: 0;
-  color: var(--ink, #182c32);
+  color: var(--ink, var(--foreground));
 }
 .p6-section-head h2 {
   margin: 8px 0;
@@ -21,7 +21,7 @@
 }
 .p6-section-head p,
 .p6-note {
-  color: #56666c;
+  color: var(--muted-foreground);
   font-size: 13px;
   line-height: 1.65;
   max-width: 52ch;
@@ -32,7 +32,7 @@
   padding: 0;
   margin: 26px 0 20px;
   list-style: none;
-  border: 1px solid #dfe6e2;
+  border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -43,16 +43,16 @@
   align-items: center;
   gap: 9px 10px;
   padding: 21px 20px;
-  background: #f8faf9;
-  border-right: 1px solid #dfe6e2;
-  color: #596970;
+  background: var(--surface-subtle);
+  border-right: 1px solid var(--border);
+  color: var(--muted-foreground);
 }
 .p6-lane li:last-child {
   border-right: 0;
 }
 .p6-lane li.done {
-  background: #edf3e9;
-  color: #294736;
+  background: var(--surface-accent);
+  color: var(--success);
 }
 .p6-lane li > span:last-child {
   grid-column: 1/-1;
@@ -84,7 +84,7 @@
 .p6-tracking span,
 .p6-tracking small {
   font-size: 12px;
-  color: #596970;
+  color: var(--muted-foreground);
 }
 .p6-actions {
   display: flex;
@@ -94,7 +94,7 @@
   margin-top: 18px;
 }
 .p6-actions > span {
-  color: #56666c;
+  color: var(--muted-foreground);
   font-size: 12px;
 }
 .p6-finance-returns {
@@ -115,11 +115,11 @@
   gap: 12px;
   margin: 22px 0;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e4e9e6;
+  border-bottom: 1px solid var(--border);
 }
 .p6-money dt {
   font-size: 11px;
-  color: #56666c;
+  color: var(--muted-foreground);
 }
 .p6-money dd {
   font-size: clamp(16px, 1.5vw, 21px);
@@ -135,7 +135,7 @@
 }
 .p6-records > li {
   padding: 16px 0;
-  border-top: 1px solid #e4e9e6;
+  border-top: 1px solid var(--border);
   display: grid;
   gap: 7px;
 }
@@ -145,7 +145,7 @@
 .p6-records p,
 .p6-timeline p {
   font-size: 13px;
-  color: #56666c;
+  color: var(--muted-foreground);
   line-height: 1.6;
   margin: 0;
   overflow-wrap: anywhere;
@@ -153,7 +153,7 @@
 .p6-records small,
 .p6-timeline small {
   display: block;
-  color: #596970;
+  color: var(--muted-foreground);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -168,17 +168,17 @@
   display: inline-flex;
   padding: 5px 9px;
   border-radius: 6px;
-  background: #f1f3ee;
-  color: #4c5c42;
+  background: var(--surface-muted);
+  color: var(--accent-foreground);
   font-size: 11px;
   text-transform: capitalize;
 }
 .p6-chip.done {
-  background: #e8f1e9;
-  color: #2d533c;
+  background: var(--surface-accent);
+  color: var(--success);
 }
 .p6-empty {
-  color: #596970;
+  color: var(--muted-foreground);
   font-size: 13px;
   line-height: 1.7;
   margin: 24px 0 18px;
@@ -202,7 +202,7 @@
 }
 .p6-return-line span {
   font-size: 11px;
-  color: #596970;
+  color: var(--muted-foreground);
 }
 .p6-timeline {
   margin: 20px 0;
@@ -226,7 +226,7 @@
   left: 5px;
   bottom: 0;
   width: 1px;
-  background: #dfe6e2;
+  background: var(--border-strong);
 }
 .p6-timeline li:last-child::before {
   display: none;
@@ -234,10 +234,10 @@
 .p6-timeline-dot {
   width: 11px;
   height: 11px;
-  border: 2px solid #5b7858;
+  border: 2px solid var(--border-accent);
   border-radius: 50%;
   margin-top: 4px;
-  background: #fff;
+  background: var(--surface);
   z-index: 1;
 }
 .p6-timeline li > div {
@@ -264,14 +264,14 @@
 .p6-form label {
   display: grid;
   gap: 7px;
-  color: #273c42;
+  color: var(--foreground);
   font-size: 13px;
   font-weight: 500;
 }
 .p6-form label span {
   font-size: 11px;
   font-weight: 400;
-  color: #596970;
+  color: var(--muted-foreground);
 }
 .p6-form input,
 .p6-form textarea {
@@ -279,14 +279,14 @@
   min-height: 42px;
   padding: 10px 12px;
   font: inherit;
-  color: #182c32;
-  background: #fff;
-  border: 1px solid #ccd7d2;
+  color: var(--foreground);
+  background: var(--surface);
+  border: 1px solid var(--success-border);
   border-radius: 8px;
 }
 .p6-form input:focus-visible,
 .p6-form textarea:focus-visible {
-  outline: 2px solid #526d42;
+  outline: 2px solid var(--border-accent);
   outline-offset: 3px;
 }
 .p6-form fieldset:disabled {

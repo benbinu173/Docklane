@@ -1,50 +1,19 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { ArrowUpRight } from '@phosphor-icons/react/dist/csr/ArrowUpRight'
 import { ArrowRight } from '@phosphor-icons/react/dist/csr/ArrowRight'
-import { Package } from '@phosphor-icons/react/dist/csr/Package'
-import { Check } from '@phosphor-icons/react/dist/csr/Check'
 import { Cube } from '@phosphor-icons/react/dist/csr/Cube'
-import { Sun } from '@phosphor-icons/react/dist/csr/Sun'
-import { Moon } from '@phosphor-icons/react/dist/csr/Moon'
+import { ThemeToggle } from '@/components/theme-controls'
+import { useTheme } from '@/lib/theme'
+import { OrderJourney, WorkspacePreview } from '@/components/landing-experience'
 import '@/landing.css'
+import '@/landing-experience.css'
 
 function Reveal({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={className} data-reveal>
       {children}
-    </div>
-  )
-}
-function OrderJourney() {
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 80%', 'end 30%'] })
-  const x = useTransform(scrollYProgress, [0, 1], ['0%', '300%'])
-  return (
-    <div className="landing-journey-visual" ref={ref}>
-      <div className="landing-lane" aria-hidden="true">
-        <motion.div className="landing-parcel" style={{ x }}>
-          <Package size={27} weight="duotone" />
-        </motion.div>
-      </div>
-      <ol className="landing-journey-steps">
-        {[
-          ['Reserve stock', 'Every item held together, or none at all.'],
-          ['Confirm payment', 'Verified test payment allocates the hold.'],
-          ['Pack the order', 'Review contents before recording shipment.'],
-          ['Ship with a trail', 'Tracking saved. Physical stock consumed once.'],
-        ].map(([title, body]) => (
-          <li key={title}>
-            <Check size={18} />
-            <h3>{title}</h3>
-            <p>{body}</p>
-          </li>
-        ))}
-      </ol>
-      <p className="landing-journey-note">
-        A payment refund changes money. Received, inspected returns change stock.
-      </p>
     </div>
   )
 }
@@ -66,7 +35,10 @@ function ReservationProof() {
             key={`${ran}:${index}`}
             initial={ran && !reduce ? { opacity: 0, scale: 0.92 } : false}
             animate={{ opacity: 1, scale: 1 }}
-            style={{ backgroundColor: ran ? '#b9f36b' : '#eef1f4' }}
+            style={{
+              backgroundColor: ran ? 'var(--primary)' : 'var(--surface-muted)',
+              color: ran ? 'var(--primary-foreground)' : 'var(--foreground)',
+            }}
             transition={{ duration: reduce ? 0 : 0.2, delay: reduce ? 0 : index * 0.045 }}
           >
             <Cube size={24} />
@@ -106,7 +78,7 @@ function ReservationProof() {
   )
 }
 export default function Landing() {
-  const [mode, setMode] = useState<'system' | 'light' | 'dark'>('system')
+  const { preference: mode } = useTheme()
   useEffect(() => {
     const previous = document.title
     document.title = 'Docklane | Every order, moving forward'
@@ -130,17 +102,7 @@ export default function Landing() {
           <a href="#correctness">Stock correctness</a>
         </nav>
         <div>
-          <button
-            className="landing-theme"
-            aria-label={`Change color theme, currently ${mode}`}
-            onClick={() =>
-              setMode((value) =>
-                value === 'system' ? 'dark' : value === 'dark' ? 'light' : 'system',
-              )
-            }
-          >
-            {mode === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
-          </button>
+          <ThemeToggle />
           <Link className="landing-signin" to="/auth/sign-in">
             Sign in
             <ArrowUpRight size={17} />
@@ -153,7 +115,7 @@ export default function Landing() {
             <p className="landing-eyebrow">Order & inventory platform</p>
             <h1>
               <span>Every order.</span>
-              <span>Moving forward.</span>
+              <span className="landing-headline-emphasis">Moving forward.</span>
             </h1>
             <p className="landing-intro">
               Reserve the right stock. Keep payments clear. Give every warehouse a shared view of
@@ -170,24 +132,7 @@ export default function Landing() {
               </a>
             </div>
           </Reveal>
-          <div className="landing-hero-preview">
-            <div className="landing-preview-top">
-              <span>Docklane workspace</span>
-              <span>Sample data</span>
-            </div>
-            <img
-              src="/previews/overview.webp"
-              onError={(e) => {
-                if (!e.currentTarget.src.endsWith('/inventory.webp'))
-                  e.currentTarget.src = '/previews/inventory.webp'
-              }}
-              width={1366}
-              height={900}
-              alt="Docklane operations workspace showing saved stock, warehouse balances, and order queues"
-              fetchPriority="high"
-            />
-            <p>One workspace for the people keeping orders moving.</p>
-          </div>
+          <WorkspacePreview />
         </section>
         <section id="journey" className="landing-section landing-journey">
           <Reveal>

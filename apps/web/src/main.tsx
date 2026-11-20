@@ -10,6 +10,7 @@ import '@fontsource/geist/latin-600.css'
 import '@fontsource/geist/latin-700.css'
 import '@fontsource/geist-mono/latin-400.css'
 import './base.css'
+import './theme.css'
 
 const application = (
   <StrictMode>

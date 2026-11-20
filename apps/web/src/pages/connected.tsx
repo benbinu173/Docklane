@@ -29,6 +29,8 @@ import {
 import { useIdentity, useProfile } from '@/lib/identity-context'
 import { useCart } from '@/lib/cart-context'
 import { QuickSearch } from '@/components/quick-search'
+import { NavigationHighlight, NavigationSurface } from '@/components/navigation-motion'
+import { ThemeToggle, ThemeSettings } from '@/components/theme-controls'
 import { SavedViews } from '@/components/saved-views'
 import { useStockOptions } from '@/lib/inventory-client'
 import { useBoundedRefresh, useDebounced } from '@/lib/operations-client'
@@ -186,11 +188,20 @@ export function ConnectedLayout() {
         </div>
       </div>
       <span className="connected-nav-label">YOUR WORKSPACE</span>
-      <nav aria-label="Workspace navigation">
+      <NavigationSurface label="Workspace navigation">
         {links.map(({ path, label, icon: Icon }) => (
           <Link
             key={path}
             to={path}
+            aria-current={
+              (
+                path === '/workspace' || path === '/account'
+                  ? pathname === path
+                  : pathname.startsWith(path)
+              )
+                ? 'page'
+                : undefined
+            }
             onClick={() => setMenu(false)}
             className={
               (
@@ -202,11 +213,14 @@ export function ConnectedLayout() {
                 : ''
             }
           >
+            {(path === '/workspace' || path === '/account'
+              ? pathname === path
+              : pathname.startsWith(path)) && <NavigationHighlight />}
             <Icon size={20} />
             {label}
           </Link>
         ))}
-      </nav>
+      </NavigationSurface>
       <div className="connected-nav-bottom">
         <span className="connected-seed-label">
           <span />
@@ -271,6 +285,7 @@ export function ConnectedLayout() {
           </div>
           <div>
             <QuickSearch />
+            <ThemeToggle />
             <span className="connected-role">{roleLabels[profile.role]}</span>
             <span className="connected-avatar" aria-hidden="true">
               {profile.name
@@ -955,6 +970,7 @@ export function Account() {
           <ArrowRight size={16} />
         </Link>
       </section>
+      <ThemeSettings />
     </>
   )
 }

@@ -1,11 +1,3 @@
-.connected-layout,
-.p7-command-dialog {
-  --ink: #101d2c;
-  --muted: #526173;
-  --surface: #fff;
-  --border: #d9e0e7;
-  --mist: #f4f6f8;
-}
 .p7-overview-filters,
 .p7-saved-views {
   display: flex;
@@ -21,7 +13,7 @@
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 .p7-overview-filters select,
 .p7-overview-filters input,
@@ -31,7 +23,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 12px;
-  color: var(--ink);
+  color: var(--foreground);
   background: var(--surface);
   font: inherit;
   font-size: 13px;
@@ -43,7 +35,7 @@
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  color: var(--muted);
+  color: var(--muted-foreground);
   font-size: 12px;
   margin-bottom: 14px;
 }
@@ -67,10 +59,10 @@
   border: 0;
 }
 .p7-metrics > a:hover {
-  background: #f0f6ed;
+  background: var(--surface-accent-hover);
 }
 .p7-metrics .attention {
-  background: #edf5e6;
+  background: var(--surface-accent);
 }
 .p7-metrics span {
   display: flex;
@@ -87,7 +79,7 @@
 }
 .p7-metrics small {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 .p7-operations-grid {
   display: grid;
@@ -105,7 +97,7 @@
 }
 .p7-attention > a:hover,
 .p7-sites > a:hover {
-  background: #f5f8f1;
+  background: var(--surface-muted);
 }
 .p7-attention > a > span:first-child,
 .p7-sites > a > span:nth-child(2) {
@@ -121,7 +113,7 @@
   display: block;
   margin-top: 4px;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 .p7-attention b {
   min-width: 34px;
@@ -135,7 +127,7 @@
   height: 42px;
   display: grid;
   place-items: center;
-  background: var(--mist);
+  background: var(--background);
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 11px;
@@ -175,7 +167,7 @@
 .p7-money span {
   display: block;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
   margin-bottom: 8px;
 }
 .p7-money strong {
@@ -186,7 +178,7 @@
 .p7-money p {
   grid-column: 1/-1;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
   margin: 16px 0 0;
 }
 .p7-activity {
@@ -215,19 +207,19 @@
 .p7-activity small,
 .p7-activity time {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 .p7-activity .text-link {
   font-size: 12px;
 }
 .p7-definitions {
-  color: var(--muted);
+  color: var(--muted-foreground);
   font-size: 13px;
   margin: 22px 0;
 }
 .p7-definitions summary {
   cursor: pointer;
-  color: var(--ink);
+  color: var(--foreground);
   padding: 8px 0;
 }
 .p7-definitions p {
@@ -255,7 +247,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 22px;
-  background: #f1f5ec;
+  background: var(--surface-accent);
   font-size: 12px;
 }
 .p7-search-trigger {
@@ -268,11 +260,11 @@
   border-radius: 8px;
   background: var(--surface);
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
   cursor: pointer;
 }
 .p7-search-trigger kbd {
-  background: var(--mist);
+  background: var(--background);
   font-family: inherit;
   font-size: 10px;
   border: 1px solid var(--border);
@@ -294,7 +286,7 @@
   outline: none;
 }
 .p7-command-dialog [cmdk-input]:focus {
-  box-shadow: inset 0 -2px var(--ink);
+  box-shadow: inset 0 -2px var(--foreground);
 }
 .p7-command-dialog [cmdk-list] {
   max-height: min(430px, 60dvh);
@@ -303,7 +295,7 @@
 }
 .p7-command-dialog [cmdk-group-heading] {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-foreground);
   padding: 10px 12px;
 }
 .p7-command-dialog [cmdk-item] {
@@ -317,21 +309,21 @@
   cursor: pointer;
 }
 .p7-command-dialog [cmdk-item][data-selected='true'] {
-  background: #eaf4e1;
-  color: var(--ink);
+  background: var(--surface-accent);
+  color: var(--foreground);
 }
 .p7-command-dialog [cmdk-item] strong {
   font-weight: 500;
 }
 .p7-command-dialog [cmdk-item] small {
   display: block;
-  color: var(--muted);
+  color: var(--muted-foreground);
   margin-top: 4px;
   font-size: 11px;
 }
 .p7-search-state {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted-foreground);
   padding: 12px;
 }
 .connected-orders-tools {

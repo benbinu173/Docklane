@@ -123,7 +123,7 @@ test('loading, empty, and error previews have usable recovery', async ({ page })
       await expect(page.getByText('A fresh start for your operations')).toBeVisible()
     else await expect(page.getByRole('button', { name: 'Try again', exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Return to demo', exact: false }).click()
-    await expect(page.locator('.fulfillment-flow')).toBeVisible()
+    await expect(page.locator('.fulfillment-board')).toBeVisible()
   }
 })
 

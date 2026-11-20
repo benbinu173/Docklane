@@ -1,0 +1,130 @@
+# Candidate deployment; creating/applying this Blueprint requires workspace and plan approval.
+# External URLs are entered after Render assigns public domains. No string interpolation.
+services:
+  - type: web
+    name: docklane-web
+    runtime: static
+    buildCommand: npm ci --include=dev && npm run deploy:build:web
+    staticPublishPath: apps/web/dist
+    autoDeployTrigger: 'off'
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: VITE_API_URL
+        sync: false
+      - key: VITE_NEON_AUTH_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /welcome
+        destination: /welcome.html
+      - type: rewrite
+        source: /welcome/
+        destination: /welcome.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+
+  - type: web
+    name: docklane-api
+    runtime: node
+    region: singapore
+    plan: 0.5c-512mb
+    numInstances: 1
+    buildCommand: npm ci --include=dev && npm run deploy:build:backend
+    preDeployCommand: npm run deploy:check:api && npm run db:migrate
+    startCommand: npm run deploy:start:api
+    healthCheckPath: /health/ready
+    autoDeployTrigger: 'off'
+    envVars:
+      - fromGroup: docklane-demo-settings
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY_HOPS
+        value: '1'
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: DEMO_DATABASE_HOST
+        sync: false
+      - key: NEON_AUTH_BASE_URL
+        sync: false
+      - key: NEON_AUTH_JWKS_URL
+        sync: false
+      - key: WEB_ORIGINS
+        sync: false
+      - key: CHECKOUT_RETURN_ORIGIN
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+  - type: worker
+    name: docklane-worker
+    runtime: node
+    region: singapore
+    plan: 0.5c-512mb
+    numInstances: 1
+    buildCommand: npm ci --include=dev && npm run deploy:build:backend
+    startCommand: npm run deploy:start:worker
+    autoDeployTrigger: 'off'
+    envVars:
+      - fromGroup: docklane-demo-settings
+      - key: WORKER_HOST
+        value: 127.0.0.1
+      - key: WORKER_PORT
+        value: '4010'
+      - key: DATABASE_URL
+        fromService:
+          type: web
+          name: docklane-api
+          envVarKey: DATABASE_URL
+      - key: DEMO_DATABASE_HOST
+        fromService:
+          type: web
+          name: docklane-api
+          envVarKey: DEMO_DATABASE_HOST
+      - key: STRIPE_SECRET_KEY
+        fromService:
+          type: web
+          name: docklane-api
+          envVarKey: STRIPE_SECRET_KEY
+      - key: STRIPE_WEBHOOK_SECRET
+        fromService:
+          type: web
+          name: docklane-api
+          envVarKey: STRIPE_WEBHOOK_SECRET
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: docklane-queue
+          property: connectionString
+
+  - type: keyvalue
+    name: docklane-queue
+    region: singapore
+    plan: 256mb
+    maxmemoryPolicy: noeviction
+    persistenceMode: journal-snapshot
+    ipAllowList: []
+
+envVarGroups:
+  - name: docklane-demo-settings
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: BUSINESS_ID
+        value: northstar-supply
+      - key: ALLOW_DEVELOPMENT_SEED
+        value: 'false'

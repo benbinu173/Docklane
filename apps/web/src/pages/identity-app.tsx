@@ -1,6 +1,7 @@
 import { lazy } from 'react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from 'sonner'
+import { useTheme } from '@/lib/theme'
 import { Routes, Route, useParams } from 'react-router-dom'
 import { IdentityProvider } from '@/lib/identity-context'
 import { CartProvider } from '@/lib/cart-context'
@@ -20,6 +21,7 @@ import '@/phase4.css'
 import '@/phase5.css'
 import '@/phase6.css'
 import '@/phase7.css'
+import '@/experience.css'
 import ConnectedOverview from './connected-overview'
 
 const InventoryWorkspace = lazy(() =>
@@ -43,6 +45,7 @@ const CustomerCheckout = lazy(() =>
 const Operations = lazy(() => import('./operations'))
 
 export default function IdentityApp() {
+  const { resolved } = useTheme()
   return (
     <TooltipProvider delayDuration={250}>
       <IdentityProvider>
@@ -86,6 +89,7 @@ export default function IdentityApp() {
         </CartProvider>
       </IdentityProvider>
       <Toaster
+        theme={resolved}
         position="bottom-right"
         richColors
         closeButton

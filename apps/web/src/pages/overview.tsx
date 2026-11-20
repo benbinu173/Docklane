@@ -7,9 +7,7 @@ import {
   Tooltip as ChartTooltip,
   XAxis,
 } from 'recharts'
-import { ArrowRight } from '@phosphor-icons/react/dist/csr/ArrowRight'
 import { ArrowUpRight } from '@phosphor-icons/react/dist/csr/ArrowUpRight'
-import { Check } from '@phosphor-icons/react/dist/csr/Check'
 import { Clock } from '@phosphor-icons/react/dist/csr/Clock'
 import { Cube } from '@phosphor-icons/react/dist/csr/Cube'
 import { Info } from '@phosphor-icons/react/dist/csr/Info'
@@ -36,6 +34,7 @@ import {
   TextLink,
 } from '@/components/shared'
 import { WarehouseSelect } from '@/components/workspace-shell'
+import { FulfillmentBoard } from '@/components/fulfillment-board'
 import { useDemo } from '@/lib/demo-context'
 import { useWorkspace } from '@/hooks/use-workspace'
 import {
@@ -189,47 +188,21 @@ export default function Overview() {
             </div>
           ))}
         </div>
-        <section className="panel fulfillment-panel">
-          <PanelHeading
-            title="Every order has a next move."
-            description="Your fulfillment pipeline, at a glance."
-            action={
-              <span className="subtle-pill">
-                <span className="semantic-dot" />
-                {filteredOrders.length} sample orders today
-              </span>
-            }
-          />
-          <div className="fulfillment-flow">
-            {stages.map(({ id, name, icon: Icon, subtitle, className }, index) => (
-              <button
-                key={id}
-                className={`flow-stage ${className}`}
-                onClick={() => go('/orders', { stage: id })}
-              >
-                <div className="flow-stage-top">
-                  <span className="flow-icon">
-                    <Icon size={23} weight="duotone" />
-                  </span>
-                  <span className="flow-step">0{index + 1}</span>
-                </div>
-                <div className="flow-number">
-                  {filteredOrders.filter((order) => order.stage === id).length}
-                  <ArrowRight size={20} />
-                </div>
-                <strong>{name}</strong>
-                <span className="flow-caption">{subtitle}</span>
-              </button>
-            ))}
-          </div>
-          <div className="pipeline-footer">
-            <span>
-              <Check size={15} weight="bold" />
-              {shipped.length} orders have reached dispatch today.
-            </span>
-            <TextLink onClick={() => go('/orders')}>Follow your orders</TextLink>
-          </div>
-        </section>
+        <FulfillmentBoard
+          title="Every order has a next move."
+          description="Your fulfillment pipeline, at a glance."
+          lanes={stages.map(({ id, name, icon, subtitle }) => ({
+            id,
+            label: name,
+            icon,
+            note: subtitle,
+            count: filteredOrders.filter((order) => order.stage === id).length,
+            href: `/orders?${new URLSearchParams({ stage: id, ...(warehouse !== 'all' ? { warehouse } : {}) })}`,
+            priority: id === 'ready',
+          }))}
+          note={`${shipped.length} of ${filteredOrders.length} sample orders have reached dispatch.`}
+          href={`/orders${warehouse !== 'all' ? `?warehouse=${encodeURIComponent(warehouse)}` : ''}`}
+        />
         <div className="overview-middle">
           <section className="panel activity-chart-panel">
             <PanelHeading
@@ -274,28 +247,39 @@ export default function Overview() {
                       <stop offset="100%" stopColor="#b9f36b" stopOpacity={0.03} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="#e8edf0" />
+                  <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="var(--border)" />
                   <XAxis
                     dataKey="day"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fill: '#677484', fontSize: 11 }}
+                    tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
                     minTickGap={15}
                     dy={8}
                   />
                   <ChartTooltip
-                    contentStyle={{ borderRadius: 10, border: '1px solid #d9e0e7', fontSize: 12 }}
+                    contentStyle={{
+                      borderRadius: 10,
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
+                      color: 'var(--foreground)',
+                      fontSize: 12,
+                    }}
                     formatter={(value) => [value, 'Orders']}
-                    cursor={{ stroke: '#a8b994', strokeDasharray: '4 4' }}
+                    cursor={{ stroke: 'var(--border-accent)', strokeDasharray: '4 4' }}
                   />
                   <Area
                     type="monotone"
                     dataKey="orders"
-                    stroke="#617a42"
+                    stroke="var(--chart-line)"
                     strokeWidth={2.5}
                     fill="url(#orderFill)"
                     isAnimationActive={false}
-                    activeDot={{ r: 5, fill: '#101d2c', stroke: '#b9f36b', strokeWidth: 3 }}
+                    activeDot={{
+                      r: 5,
+                      fill: 'var(--foreground)',
+                      stroke: '#b9f36b',
+                      strokeWidth: 3,
+                    }}
                   />
                 </AreaChart>
               </ResponsiveContainer>

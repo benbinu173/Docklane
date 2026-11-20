@@ -64,7 +64,10 @@ test('dashboard queues reconcile with saved lists and filtered context survives 
     const link = page.locator('.p7-attention a').filter({ hasText: label })
     await expect(link.locator('b')).toHaveText(String(data.queues[key]))
   }
-  await page.getByRole('link', { name: /Ready to pack/ }).click()
+  await page
+    .locator('.p7-attention')
+    .getByRole('link', { name: /Ready to pack/ })
+    .click()
   await expect(page.getByRole('combobox', { name: 'Filter order queue' })).toHaveValue('pack')
   const filtered = await request.get(`${apiUrl}/api/v1/orders?queue=pack`, { headers })
   const orders = (await filtered.json()).data

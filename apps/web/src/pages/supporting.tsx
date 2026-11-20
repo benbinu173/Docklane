@@ -16,6 +16,7 @@ import { Users } from '@phosphor-icons/react/dist/csr/Users'
 import { Warehouse } from '@phosphor-icons/react/dist/csr/Warehouse'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { ThemeSettings } from '@/components/theme-controls'
 import {
   Dialog,
   DialogContent,
@@ -554,6 +555,7 @@ export function Settings() {
         description="Your sample business, workspace details, and prototype controls."
       />
       <div className="settings-grid">
+        <ThemeSettings />
         <section className="panel settings-business">
           <PanelHeading title="Your workspace" description="The business behind the sample data." />
           <div className="business-profile">

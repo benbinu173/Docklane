@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm ci --include=dev",
+  "buildCommand": "npm run deploy:build:web",
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    { "source": "/welcome", "destination": "/welcome.html" },
+    { "source": "/welcome/", "destination": "/welcome.html" },
+    { "source": "/((?!assets/|products/|previews/|favicon).*)", "destination": "/index.html" }
+  ]
+}

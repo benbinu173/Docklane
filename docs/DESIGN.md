@@ -1,12 +1,32 @@
 # Docklane design direction
 
-Status: Phases 1-7 implemented. The connected briefing includes explainable metrics, attention queues, warehouse/date filters, personal saved views, and role-scoped keyboard search. The public product page at /welcome uses real product screenshots, a scroll-linked fulfillment lane, an illustrative concurrency proof, and system light/dark themes. See [Phase 7](PHASE_7.md) for verification and previews.
+Status: Phases 1-8 implemented, followed by a focused visual and motion refresh. The connected briefing includes explainable metrics, attention queues, warehouse/date filters, personal saved views, and role-scoped keyboard search. The public product page at /welcome uses real product screenshots, an interactive fulfillment story, an illustrative concurrency proof, and system light/dark themes. See [Phase 8](PHASE_8.md) for the verified application foundation.
 
 ## Design read
 
 A modern operations application for merchants and warehouse teams, with a polished, energetic visual language. Order movement provides the recurring visual idea across the identity, product, and marketing page.
 
 The workspace prioritizes clear information and fast interaction. The landing page has more room for expressive composition and narrative animation.
+
+## Visual and motion refresh
+
+The audit found a consistent Geist type system, readable navy/mist/lime tokens, working keyboard navigation, and a sound page hierarchy. The main opportunities were the static hero screenshot, a fulfillment illustration that could not be explored by step, and limited relationship between the prototype pipeline and the connected briefing. The refresh preserves routes, navigation labels, identity, forms, and authoritative quantities.
+
+The public page uses design variance 6, motion intensity 6, and visual density 4. Its existing React, Radix, CSS, and Motion foundation stays in place. The operations UI follows the existing product design system, with lower motion intensity of 3. Marketing composition rules apply to the public page.
+
+- The hero switches between authentic Overview, Inventory, and Orders screenshots. Keyboard-operable tabs include a direct link to each sample view. A small pointer tilt on devices with a mouse communicates that the preview is interactive. The initial image renders immediately; view transitions start after a user switches tabs.
+- The order story explains reservation, verified payment, packing, and shipment through selectable steps. An optional Play journey sequence stops at shipment, pauses out of view or in a hidden tab, and is disabled by reduced-motion preference. Illustrative stock quantities remain distinct from saved workspace data.
+- Both overviews use a shared fulfillment board. Counts come directly from their existing sources, and each lane opens its filtered orders. The connected board respects warehouse and date filters; it does not derive a misleading total from overlapping queues.
+- Active navigation moves between destinations with a short spring transition. Metric, queue, and button feedback uses transforms and color. Stock counts and payment amounts never count up or interpolate.
+- Transforms and opacity carry movement. Mobile layouts keep touch targets and collapse the journey and fulfillment queues. Reduced-motion users can navigate every step without animation or automatic playback.
+
+The public page imports Radix Tabs directly and separates its shared primitives from workspace controls. This changes the initially required UI-control code from approximately 50 KB gzip to 10 KB gzip. The direct dependency uses the already-resolved Tabs version, 1.2.1.
+
+Verification passed the 15 existing public/prototype browser cases, one connected development dashboard regression, and 13 focused interaction checks. These cover keyboard preview selection, stock-state illustrations, play/pause, stopping at shipment, offscreen playback, changing reduced-motion preferences, and preserving warehouse filters. Connected desktop accessibility/mobile layout, ordinary/reduced-motion hydration, and styled no-JavaScript content also passed. Type checking, production build, lint, and formatting were verified.
+
+A local Lighthouse 12.8.2 run after the visual/motion refresh, before the complete workspace theme update, measured performance 89, accessibility 100, best practices 100, and SEO 92. Largest contentful paint was 3.3 seconds, total blocking time 90 milliseconds, and cumulative layout shift 0. These are single local diagnostics; scores vary with the device and runtime conditions.
+
+Dependency follow-up: the three high findings reported on 20 November 2026 through Prisma 7.10.1 / Effect 3.20.0 ([GHSA-7589-6fvf-x4pw](https://github.com/advisories/GHSA-7589-6fvf-x4pw)) are resolved in Phase 9 preparation. The shared Prisma CLI now belongs to root tooling, where a scoped override selects compatible Effect 3.22.1. A fresh Linux Node 22.23.5 install, valid dependency tree, complete module loading, Prisma generation, backend/frontend deployment builds, domain checks, and a full zero-finding audit passed. Prisma remains on stable 7.10.1; see [Phase 9 verification](PHASE_9.md).
 
 ## Brand
 
@@ -43,7 +63,11 @@ Status colors communicate meaning and always have text or icons alongside them. 
 - Elevation: restrained; use a subtle shadow for overlays and drawers, separators for ordinary grouping.
 - Icons: one Phosphor family with consistent weights and sizes.
 
-The dark navigation and light workspace are fixed parts of the initial application composition. A complete optional dark workspace is a later enhancement.
+The navy navigation remains a signature brand surface. The complete workspace supports light, dark, and device-following themes, including connected staff/customer screens and sign-in. A shared theme control appears in page headers; Settings and My account provide explicit appearance choices. The preference persists across navigation and reloads, synchronizes across tabs, and follows device changes in System mode. Storage restrictions still allow theme changes for the current visit.
+
+Semantic colors cover surfaces, text, borders, focus, status feedback, inventory bars, chart tooltips, native fields, popup menus, drawers, and notifications. Lime actions retain dark text in both modes. Product imagery keeps its original colors. The public preview uses actual screenshots captured in both themes; regenerate them with `node scripts/capture-theme-previews.mjs` while the local app is running. An early head script applies the stored preference before React renders; static public content follows device colors when JavaScript is unavailable.
+
+Theme verification passed 20 production browser cases, covering the existing workspace flows, responsive landing page, persisted choices, portaled controls, device changes, restricted storage, cross-tab synchronization, and dark order details. Automated scans reviewed public/sample/sign-in screens and all connected staff/customer main pages in both palettes; the connected inventory badge was corrected and rechecked. Mobile checks found no page overflow. Production hydration, saved dark colors before React loads, and static device-dark content without JavaScript passed. Web/tooling type checks, the production build, lint, and formatting also passed.
 
 ## Navigation and screen architecture
 
@@ -96,16 +120,16 @@ The first release models warehouses as sites. Bin-level layouts, location maps, 
 
 ## Motion system
 
-| Interaction             | Behavior                                                         | Purpose                         |
-| ----------------------- | ---------------------------------------------------------------- | ------------------------------- |
-| Button hover and press  | Short color transition and restrained press feedback             | Confirm responsiveness          |
-| Drawer opening          | Smooth translate/fade, approximately 220-300 ms                  | Preserve list-to-detail context |
-| Filter changes          | Stable layout and a brief loading state when fetching            | Explain changing results        |
-| Confirmed stock updates | Brief highlight on the changed number or row                     | Make the result visible         |
-| Order status changes    | Transition the relevant timeline stage after server confirmation | Explain progress                |
-| Toasts                  | Short enter/exit transition with actionable text                 | Confirm outcomes                |
-| Loading                 | Stable skeletons, without perpetual distracting motion           | Preserve hierarchy              |
-| Landing page            | Scroll-linked fulfillment illustration using product previews    | Explain the product story       |
+| Interaction             | Behavior                                                          | Purpose                         |
+| ----------------------- | ----------------------------------------------------------------- | ------------------------------- |
+| Button hover and press  | Short color transition and restrained press feedback              | Confirm responsiveness          |
+| Drawer opening          | Smooth translate/fade, approximately 220-300 ms                   | Preserve list-to-detail context |
+| Filter changes          | Stable layout and a brief loading state when fetching             | Explain changing results        |
+| Confirmed stock updates | Brief highlight on the changed number or row                      | Make the result visible         |
+| Order status changes    | Transition the relevant timeline stage after server confirmation  | Explain progress                |
+| Toasts                  | Short enter/exit transition with actionable text                  | Confirm outcomes                |
+| Loading                 | Stable skeletons, without perpetual distracting motion            | Preserve hierarchy              |
+| Landing page            | Selectable fulfillment story, optional playback, and preview tabs | Explain the product story       |
 
 Operational motion is moderate and finishes quickly. Larger landing-page animations must fit the narrative and remain responsive.
 

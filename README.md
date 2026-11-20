@@ -4,7 +4,7 @@
 
 Docklane is an order and inventory platform with a navy, mist, and lime visual identity. Its central engineering objective is preventing overselling when customers order simultaneously.
 
-**Phases 1-8 are complete.** Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. The connected operations overview adds explainable metrics, date/warehouse filters, personal saved views, and keyboard search. The release candidate now includes request protection, queue-disconnect recovery checks, connected workflows in CI, and measured query/frontend improvements. See [the build plan](docs/PROJECT_PLAN.md) and [Phase 8 delivery notes](docs/PHASE_8.md).
+**Phases 1-8 are complete; Phase 9 release preparation is underway.** Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. The connected operations overview adds explainable metrics, date/warehouse filters, personal saved views, and keyboard search. The release candidate now includes request protection, queue-disconnect recovery checks, connected workflows in CI, and measured query/frontend improvements. See [the build plan](docs/PROJECT_PLAN.md) and [Phase 8 delivery notes](docs/PHASE_8.md).
 
 ## Open the current workspace
 
@@ -43,7 +43,7 @@ Never commit `.env.local`, `.local`, or connection credentials. Redis supports t
 
 ## What works
 
-- Product page: real workspace previews, an animated fulfillment narrative, a reservation-proof illustration, system light/dark themes, and demo/sign-in entry at /welcome.
+- Product page: real workspace previews, an animated fulfillment narrative, a reservation-proof illustration, persisted Light/Dark/System themes, and demo/sign-in entry at /welcome.
 - Public prototype: inventory filters, sorting, pagination, export, stock drawers, sample adjustments, order drawers, simulated packing, warehouse views, command menu, and responsive navigation.
 - Identity: customer signup, sign-in, sign-out, session restoration, password recovery/reset, protected routes, and explicit failure states.
 - Connected workspace: API-backed briefing, actionable queues, explainable stock/test-money metrics, date/warehouse filters, actor-stamped activity, richer order filters, eight account-specific browser-local saved views, keyboard quick search, and preserved detail/list context.
@@ -103,7 +103,7 @@ These checks capture clean previews intentionally. Reset verification reads a pr
 
 Phase 8 validation passed **139 distinct checks**: eight domain, 103 PostgreSQL/API, and 28 production browser tests, including focused timing reruns. Limits, safe request/configuration failures, concurrent first login, queue disconnect/reconnection, replacement leases, and complete customer/staff workflows passed. All 81 original balances and DL-10023 were preserved. The validated benchmark used 20,000 balances and 5,000 orders; the catalog stock read took 0.661 ms with the SKU index versus 4.278 ms for a sequential comparison on the same fixture. The local mobile Lighthouse run scored 92 performance and 100 accessibility with zero layout shift. See [Phase 8 results and reproduction commands](docs/PHASE_8.md).
 
-The [CI workflow](.github/workflows/ci.yml) configures PostgreSQL/Redis and runs formatting, linting, type checking, builds, domain/API tests, the concurrency script, and public/connected production browser tests. Live Auth checks stay outside ordinary CI. The current dependency audit reports zero advisories; the Phase 2 audit notes describe historical findings.
+The [CI workflow](.github/workflows/ci.yml) configures PostgreSQL/Redis and runs formatting, linting, type checking, builds, domain/API tests, the concurrency script, and public/connected production browser tests. Live Auth checks stay outside ordinary CI. Phase 9 preparation resolves the Prisma/Effect advisory with compatible Effect 3.22.1 while retaining Prisma 7.10.1. A clean Linux install, valid dependency tree, deployment builds and full audit with zero findings passed; see [Phase 9 verification](docs/PHASE_9.md).
 
 ## Stack and documents
 
@@ -124,4 +124,4 @@ React/Vite/TypeScript, Tailwind v4, customized shadcn/Radix, self-hosted Geist, 
 - [Repeatable concurrency proof](docs/CONCURRENCY_PROOF.md)
 - [Asset sources](docs/ASSETS.md)
 
-Next: [Phase 9 deployment, demo, and portfolio packaging](docs/PROJECT_PLAN.md#phase-9-deployment-demo-and-portfolio-packaging).
+Phase 9 is in progress. See [deployment preparation and costs](docs/DEPLOYMENT.md), [architecture](docs/ARCHITECTURE.md), [operations and backup/reset procedures](docs/OPERATIONS.md), [guided demo](docs/DEMO.md), and [portfolio bullets](docs/PORTFOLIO.md). Hosted links and smoke verification remain pending; follow the [Phase 9 record](docs/PHASE_9.md).

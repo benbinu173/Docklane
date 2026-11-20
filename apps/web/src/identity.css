@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .auth-layout {
   min-height: 100dvh;
@@ -42,7 +42,7 @@
   font-size: 10px;
   letter-spacing: 1.6px;
   font-weight: 500;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-bottom: 18px;
 }
 .auth-story .auth-eyebrow {
@@ -140,18 +140,18 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #fff;
+  background: var(--surface);
 }
 .auth-back {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
   width: fit-content;
 }
 .auth-back:hover {
-  color: #101d2c;
+  color: var(--foreground);
 }
 .auth-form-content {
   width: 100%;
@@ -170,7 +170,7 @@
   margin: 0;
 }
 .auth-subtitle {
-  color: #526173;
+  color: var(--muted-foreground);
   line-height: 1.8;
   font-size: 14px;
   margin: 16px 0 30px;
@@ -202,7 +202,7 @@
 }
 .auth-field-label a {
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -220,14 +220,14 @@
   height: 44px;
   border: 0;
   background: none;
-  color: #526173;
+  color: var(--muted-foreground);
   display: grid;
   place-items: center;
 }
 .auth-field small {
   font-size: 11px;
   display: block;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 8px;
 }
 .auth-form .btn-primary,
@@ -238,10 +238,10 @@
   padding: 0 17px;
 }
 .auth-error {
-  background: #fff1ee;
-  border: 1px solid #eebeb6;
+  background: var(--surface-muted);
+  border: 1px solid var(--error-border);
   padding: 12px 14px;
-  color: #9d2c24;
+  color: var(--error);
   font-size: 13px;
   line-height: 1.7;
   border-radius: 8px;
@@ -250,13 +250,13 @@
 .auth-switch {
   margin-top: 24px;
   font-size: 13px;
-  color: #526173;
+  color: var(--muted-foreground);
   text-align: center;
   line-height: 1.8;
 }
 .auth-switch a,
 .text-link {
-  color: #101d2c;
+  color: var(--foreground);
   font-weight: 500;
   text-underline-offset: 4px;
 }
@@ -264,10 +264,10 @@
   text-decoration: underline;
 }
 .auth-form-note {
-  border-top: 1px solid #dfe5e9;
+  border-top: 1px solid var(--border);
   padding-top: 22px;
   margin-top: 32px;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
   line-height: 1.8;
   position: relative;
@@ -276,7 +276,7 @@
   display: inline-block;
   width: 6px;
   height: 6px;
-  background: #6e9450;
+  background: var(--surface-accent);
   border-radius: 50%;
   margin-right: 7px;
 }
@@ -285,7 +285,7 @@
   justify-content: space-between;
   gap: 12px;
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
   padding-top: 18px;
 }
 .auth-back.bottom {
@@ -293,7 +293,7 @@
 }
 .auth-message,
 .auth-success {
-  border: 1px solid #dfe5e9;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 22px;
   font-size: 13px;
@@ -303,7 +303,7 @@
   margin-bottom: 20px;
 }
 .auth-success > svg {
-  color: #216e46;
+  color: var(--success);
   margin-bottom: 14px;
 }
 .auth-success h2 {
@@ -311,7 +311,7 @@
   margin: 0;
 }
 .auth-success p {
-  color: #526173;
+  color: var(--muted-foreground);
   margin: 10px 0 23px;
 }
 .text-link {
@@ -325,7 +325,7 @@
 }
 .connected-layout {
   min-height: 100dvh;
-  background: #f4f6f8;
+  background: var(--background);
 }
 .connected-sidebar {
   position: fixed;
@@ -431,8 +431,8 @@
 }
 .connected-topbar {
   height: 72px;
-  border-bottom: 1px solid #dfe5e9;
-  background: #fff;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -447,17 +447,17 @@
 }
 .connected-role {
   padding: 5px 9px;
-  border: 1px solid #dfe5e9;
+  border: 1px solid var(--border);
   border-radius: 5px;
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-avatar {
   width: 31px;
   height: 31px;
   display: grid;
   place-items: center;
-  background: #e0ecd8;
+  background: var(--surface-accent);
   border-radius: 50%;
   font-size: 10px;
   font-weight: 600;
@@ -467,13 +467,13 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #526173;
+  color: var(--muted-foreground);
   background: none;
   border: 0;
   font-size: 12px;
 }
 .connected-signout:hover {
-  color: #101d2c;
+  color: var(--foreground);
 }
 .connected-menu {
   display: none;
@@ -499,7 +499,7 @@
 }
 .connected-page-title p {
   font-size: 13px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin: 14px 0 0;
   line-height: 1.8;
 }
@@ -517,15 +517,15 @@
 .connected-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 1px solid #dfe5e9;
+  border: 1px solid var(--border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--surface);
   overflow: hidden;
   margin-bottom: 24px;
 }
 .connected-metrics > div {
   padding: 25px 22px;
-  border-right: 1px solid #e7ecf0;
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
 }
@@ -533,11 +533,11 @@
   border: 0;
 }
 .connected-metrics .highlight {
-  background: #f5f8ed;
+  background: var(--surface-accent);
 }
 .connected-metrics span {
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-metrics strong {
   font-size: 34px;
@@ -548,7 +548,7 @@
 .connected-metrics small {
   font-size: 10px;
   line-height: 1.8;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-section-title {
   padding: 24px;
@@ -563,7 +563,7 @@
   margin: 0;
 }
 .connected-section-title p {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 12px;
   line-height: 1.7;
   margin: 7px 0 0;
@@ -578,14 +578,14 @@
   gap: 15px;
 }
 .connected-sites > div {
-  border: 1px solid #dfe5e9;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 19px;
-  background: #f8faf5;
+  background: var(--surface-subtle);
 }
 .connected-sites .mono {
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-sites h3 {
   font-size: 15px;
@@ -594,7 +594,7 @@
 }
 .connected-sites p {
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-sites > div > div {
   display: grid;
@@ -609,7 +609,7 @@
 .connected-sites div > div > span {
   grid-row: 2;
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-top: 5px;
 }
 .connected-orders-panel {
@@ -638,31 +638,31 @@
   align-items: center;
   white-space: nowrap;
   border-radius: 5px;
-  background: #edf1f5;
-  color: #526173;
+  background: var(--surface-muted);
+  color: var(--muted-foreground);
   padding: 5px 8px;
   font-size: 10px;
 }
 .connected-badge.good {
-  color: #216e46;
-  background: #eaf4e5;
+  color: var(--success);
+  background: var(--surface-accent);
 }
 .connected-badge.attention {
-  color: #855a00;
-  background: #faf1da;
+  color: var(--warning);
+  background: var(--warning-surface);
 }
 .connected-callout {
   display: flex;
   align-items: center;
   gap: 15px;
   padding: 21px;
-  border: 1px solid #d9e3d2;
-  background: #eff4e9;
+  border: 1px solid var(--border-accent);
+  background: var(--surface-accent);
   border-radius: 10px;
 }
 .connected-callout > svg {
   flex-shrink: 0;
-  color: #55763a;
+  color: var(--accent-foreground);
 }
 .connected-callout strong {
   font-size: 13px;
@@ -670,7 +670,7 @@
 }
 .connected-callout p {
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
   line-height: 1.8;
   margin: 6px 0 0;
 }
@@ -684,7 +684,7 @@
   gap: 20px;
   padding: 12px 32px 25px;
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-state {
   display: flex;
@@ -701,7 +701,7 @@
   margin: 0;
 }
 .connected-state p {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 14px;
   max-width: 450px;
   line-height: 1.8;
@@ -710,8 +710,8 @@
 .connected-spinner {
   height: 24px;
   width: 24px;
-  border: 2px solid #dfe5e9;
-  border-top-color: #526173;
+  border: 2px solid var(--border);
+  border-top-color: var(--border-strong);
   border-radius: 50%;
   animation: connected-spin 1s linear infinite;
 }
@@ -725,7 +725,7 @@
   display: flex;
   gap: 14px;
   align-items: center;
-  border-bottom: 1px solid #dfe5e9;
+  border-bottom: 1px solid var(--border);
 }
 .connected-orders-tools input {
   max-width: 300px;
@@ -736,22 +736,22 @@
 .connected-team-table select {
   min-height: 44px;
   padding: 0 30px 0 12px;
-  border: 1px solid #d9e0e7;
+  border: 1px solid var(--border);
   border-radius: 7px;
-  color: #526173;
-  background-color: white;
+  color: var(--muted-foreground);
+  background-color: var(--surface);
   font-size: 12px;
 }
 .connected-orders-tools > span {
   margin-left: auto;
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 11px;
   flex-shrink: 0;
 }
 .connected-table-loading {
   padding: 45px 24px;
   font-size: 13px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-empty {
   padding: 50px 25px;
@@ -768,7 +768,7 @@
 .connected-empty p {
   font-size: 13px;
   line-height: 1.8;
-  color: #526173;
+  color: var(--muted-foreground);
   max-width: 450px;
 }
 .connected-pagination {
@@ -776,10 +776,10 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  border-top: 1px solid #dfe5e9;
+  border-top: 1px solid var(--border);
   padding: 15px 22px;
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-back {
   margin-bottom: 20px;
@@ -797,7 +797,7 @@
   gap: 10px;
 }
 .connected-statuses > div {
-  background: #f5f7f9;
+  background: var(--surface-muted);
   border-radius: 8px;
   padding: 14px;
   min-width: 0;
@@ -805,7 +805,7 @@
 .connected-statuses > div > span:first-child {
   display: block;
   font-size: 11px;
-  color: #526173;
+  color: var(--muted-foreground);
   margin-bottom: 10px;
 }
 .connected-statuses .connected-badge {
@@ -825,7 +825,7 @@
   align-items: center;
   gap: 14px;
   padding: 18px 0;
-  border-top: 1px solid #e4e9ed;
+  border-top: 1px solid var(--border);
 }
 .connected-item img {
   border-radius: 9px;
@@ -844,14 +844,14 @@
 }
 .connected-item span {
   font-size: 10px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-item > strong {
   margin-left: auto;
   white-space: nowrap;
 }
 .connected-totals {
-  border-top: 1px solid #e4e9ed;
+  border-top: 1px solid var(--border);
   padding: 22px 24px;
   display: flex;
   flex-direction: column;
@@ -862,10 +862,10 @@
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-totals > div:last-child {
-  color: #101d2c;
+  color: var(--foreground);
   font-size: 15px;
 }
 .connected-delivery {
@@ -876,11 +876,11 @@
   height: 48px;
   display: grid;
   place-items: center;
-  background: #edf3e6;
-  border: 1px solid #dbe5d1;
+  background: var(--surface-accent);
+  border: 1px solid var(--border-accent);
   border-radius: 10px;
   margin-bottom: 20px;
-  color: #5b7c41;
+  color: var(--accent-foreground);
 }
 .connected-delivery h3 {
   font-size: 12px;
@@ -889,11 +889,11 @@
 }
 .connected-delivery p {
   font-size: 12px;
-  color: #526173;
+  color: var(--muted-foreground);
   line-height: 1.9;
 }
 .connected-detail-note {
-  background: #f4f6f8;
+  background: var(--background);
   border-radius: 8px;
   padding: 16px;
   margin-top: 25px;
@@ -928,7 +928,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #dfeccf;
+  background: var(--surface-accent);
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 20px;
@@ -938,24 +938,24 @@
   margin: 0;
 }
 .connected-account > p {
-  color: #526173;
+  color: var(--muted-foreground);
   font-size: 13px;
   margin-top: 9px;
 }
 .connected-account dl {
   margin: 28px 0;
-  border-top: 1px solid #dfe5e9;
+  border-top: 1px solid var(--border);
 }
 .connected-account dl > div {
   display: flex;
   gap: 20px;
   justify-content: space-between;
   padding: 18px 0;
-  border-bottom: 1px solid #e4e9ed;
+  border-bottom: 1px solid var(--border);
   font-size: 12px;
 }
 .connected-account dt {
-  color: #526173;
+  color: var(--muted-foreground);
 }
 .connected-account dd {
   margin: 0;
@@ -1117,7 +1117,7 @@
     border-right: 0;
   }
   .connected-metrics > div:nth-child(-n + 2) {
-    border-bottom: 1px solid #e7ecf0;
+    border-bottom: 1px solid var(--border);
   }
   .connected-metrics strong {
     font-size: 31px;
@@ -1239,6 +1239,6 @@
   }
   .connected-spinner {
     animation: none;
-    border-top-color: #526173;
+    border-top-color: var(--border-strong);
   }
 }

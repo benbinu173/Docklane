@@ -8,7 +8,9 @@ import { useWorkspace } from '@/hooks/use-workspace'
 import { DemoProvider } from '@/lib/demo-context'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from 'sonner'
+import { useTheme } from '@/lib/theme'
 import '@/styles.css'
+import '@/experience.css'
 
 const Overview = lazy(() => import('@/pages/overview'))
 const Inventory = lazy(() => import('@/pages/inventory'))
@@ -79,11 +81,13 @@ function Prototype() {
 }
 
 export default function PrototypeApp() {
+  const { resolved } = useTheme()
   return (
     <TooltipProvider delayDuration={250}>
       <DemoProvider>
         <Prototype />
         <Toaster
+          theme={resolved}
           position="bottom-right"
           richColors
           closeButton
