@@ -224,7 +224,7 @@ export function ConnectedLayout() {
       <div className="connected-nav-bottom">
         <span className="connected-seed-label">
           <span />
-          Development workspace
+          Demo workspace
         </span>
         <Link to="/">
           Explore the sample workspace
@@ -235,7 +235,7 @@ export function ConnectedLayout() {
           <ArrowUpRight size={16} />
         </Link>
         <p>
-          Development accounts and sample payments.
+          Demo accounts and Stripe test payments.
           <br />
           Your bag, orders, and stock are saved.
         </p>
@@ -328,7 +328,7 @@ export function ConnectedLayout() {
         </main>
         <footer className="connected-footer">
           <span>Docklane · Every order, moving forward.</span>
-          <span>Seeded development data · INR</span>
+          <span>Demo data · INR</span>
         </footer>
       </div>
     </div>
@@ -772,7 +772,7 @@ export function ConnectedOrderDetail() {
             {order.warehouse.city}
           </p>
           <div className="connected-detail-note">
-            <strong>Development order</strong>
+            <strong>Demo order</strong>
             <p>
               Stock and order changes are saved. Payments and refunds use Stripe test mode. Shipment
               details are recorded manually.
