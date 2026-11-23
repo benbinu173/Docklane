@@ -1,6 +1,6 @@
 # Deployment preparation
 
-Status: the isolated Neon demo is initialized; the all-Render configuration is being prepared for review. No Render services or live demo URL have been created. The candidate [Render Blueprint](../infra/render.yaml) defines a static frontend, API, worker, and persistent Key Value queue. [Vercel configuration](../vercel.json) retains the originally planned frontend option.
+Status: the isolated Neon demo is initialized; the all-Render Blueprint exists, but its provider plan is awaiting workspace billing setup. No Render services or live demo URL have been created. The candidate [Render Blueprint](../infra/render.yaml) defines a static frontend, API, worker, and persistent Key Value queue. [Vercel configuration](../vercel.json) retains the originally planned frontend option.
 
 ## Hosting choice and costs
 
@@ -29,6 +29,8 @@ The migration helper preserves explicitly supplied environment variables even th
 ## Review and launch
 
 The Render tools require a confirmed workspace before Blueprint planning, and explicit approval of the actual reviewed plan before application. Cost acceptance or supplying secrets does not itself authorize deployment.
+
+The initial Blueprint `exs-dc1s8hutlv9c73cvmplg` exists with zero resources and `autoSync: false`. Render returned `need_payment_info` before it could plan the paid services. In the [Render Dashboard](https://dashboard.render.com), select My Workspace, open Billing in the left pane, then complete Payment Method setup. Keep the current workspace plan; a plan upgrade is not required by this configuration. Retry `plan_blueprint` for the existing Blueprint afterwards. Billing setup enables planning and does not replace deployment approval. See [Render dashboard billing guidance](https://render.com/docs/render-dashboard#manage-billing).
 
 Push the validated repository and `infra/render.yaml` first. Create the Blueprint with `existingResources: create_new` and `autoSync: false`. Review its proposed resources, costs, required manual values, and dashboard link. Do not approve a failed plan. All service automatic deploy triggers are off during preparation, so a Git push alone does not launch or change infrastructure.
 
