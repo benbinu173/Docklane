@@ -1,5 +1,5 @@
 // Pure validation shared by deployment commands and safety tests. Values are never logged.
-const developmentHost = 'ep-cool-waterfall-aolznx0k.ap-southeast-1.aws.neon.tech'
+const developmentCompute = 'ep-cool-waterfall-aolznx0k'
 export function urlValue(env, key) {
   try {
     const value = env[key]
@@ -40,7 +40,7 @@ export function assertDemoTarget(env, requireDirect = false) {
       url.hostname === '127.0.0.1' &&
       url.pathname === '/docklane_demo_rehearsal'
     if (
-      host === developmentHost ||
+      host.split('.')[0] === developmentCompute ||
       host !== target ||
       !['postgres:', 'postgresql:'].includes(url.protocol) ||
       (!rehearsal &&
@@ -81,13 +81,15 @@ export function validateDeployment(env, target) {
       directHost(auth.hostname.replace('.neonauth.', '.')) !== directHost(pooled.hostname)
     )
       throw new Error('Auth/JWKS must belong to the same isolated demo compute.')
+  }
+  if (target === 'api') {
     const origins = (env.WEB_ORIGINS ?? '').split(',').map((origin) => origin.trim())
     if (!origins.length || origins.length > 16) throw new Error('Configure WEB_ORIGINS.')
     for (const origin of origins) httpsUrl({ origin }, 'origin', true)
     const checkout = httpsUrl(env, 'CHECKOUT_RETURN_ORIGIN', true)
     if (!origins.includes(checkout.origin))
       throw new Error('Checkout origin must be allowed by CORS.')
-    if (target === 'api' && (env.API_HOST !== '0.0.0.0' || env.TRUST_PROXY_HOPS !== '1'))
+    if (env.API_HOST !== '0.0.0.0' || env.TRUST_PROXY_HOPS !== '1')
       throw new Error('Render requires API_HOST=0.0.0.0 and TRUST_PROXY_HOPS=1.')
   }
   if (target !== 'bootstrap') {

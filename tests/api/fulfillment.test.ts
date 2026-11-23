@@ -336,12 +336,21 @@ describe('Phase 6 fulfillment, refunds and returns on PostgreSQL', () => {
         })
       ).status,
     ).toBe(409)
-    const result = await Promise.all([
-      command(order.id, 'returns', input),
-      command(order.id, 'returns', { ...input, idempotencyKey: randomUUID() }, 'operator'),
-    ])
+    const requests = [
+      { body: input, role: 'admin' },
+      { body: { ...input, idempotencyKey: randomUUID() }, role: 'operator' },
+    ]
+    const result = await Promise.all(
+      requests.map(({ body, role }) => command(order.id, 'returns', body, role)),
+    )
     expect(result.map((r) => r.status).sort()).toEqual([201, 409])
-    expect((await command(order.id, 'returns', input)).status).toBe(201)
+    const index = result.findIndex((response) => response.status === 201)
+    const winner = requests[index],
+      loser = requests[1 - index]
+    const replay = await command(order.id, 'returns', winner.body, winner.role)
+    expect(replay.status).toBe(201)
+    expect(replay.body.data).toEqual(result[index].body.data)
+    expect((await command(order.id, 'returns', loser.body, loser.role)).status).toBe(409)
     expect(await balances(order.id)).toEqual(before)
     expect(await db.returnItem.count({ where: { receipt: { orderId: order.id } } })).toBe(1)
     expect(
@@ -372,17 +381,22 @@ describe('Phase 6 fulfillment, refunds and returns on PostgreSQL', () => {
       }),
       before = await balances(order.id),
       input = { ...operation(), quantity: 2 }
-    const results = await Promise.all([
-      command(order.id, `returns/${item.id}/restocks`, input),
-      command(
-        order.id,
-        `returns/${item.id}/restocks`,
-        { ...input, idempotencyKey: randomUUID() },
-        'operator',
-      ),
-    ])
+    const requests = [
+      { body: input, role: 'admin' },
+      { body: { ...input, idempotencyKey: randomUUID() }, role: 'operator' },
+    ]
+    const path = `returns/${item.id}/restocks`
+    const results = await Promise.all(
+      requests.map(({ body, role }) => command(order.id, path, body, role)),
+    )
     expect(results.map((r) => r.status).sort()).toEqual([200, 409])
-    expect((await command(order.id, `returns/${item.id}/restocks`, input)).status).toBe(200)
+    const index = results.findIndex((response) => response.status === 200)
+    const winner = requests[index],
+      loser = requests[1 - index]
+    const replay = await command(order.id, path, winner.body, winner.role)
+    expect(replay.status).toBe(200)
+    expect(replay.body.data).toEqual(results[index].body.data)
+    expect((await command(order.id, path, loser.body, loser.role)).status).toBe(409)
     expect(
       (await db.returnItem.findUniqueOrThrow({ where: { id: item.id } })).restockedQuantity,
     ).toBe(2)
@@ -395,10 +409,10 @@ describe('Phase 6 fulfillment, refunds and returns on PostgreSQL', () => {
     const movement = await db.inventoryMovement.findFirstOrThrow({
       where: { orderId: order.id, type: 'RETURN' },
     })
-    expect(movement.actorId).toBe(admin)
-    expect(movement.reason).toBe(input.reason)
+    expect(movement.actorId).toBe(await actor(winner.role))
+    expect(movement.reason).toBe(winner.body.reason)
     expect(
-      (await command(order.id, `returns/${item.id}/restocks`, { ...input, quantity: 1 })).status,
+      (await command(order.id, path, { ...winner.body, quantity: 1 }, winner.role)).status,
     ).toBe(409)
   })
   it('supports partial restocks and rejects a receipt belonging to another order', async () => {
@@ -457,17 +471,21 @@ describe('Phase 6 fulfillment, refunds and returns on PostgreSQL', () => {
     const order = await shipped(),
       before = await balances(order.id),
       input = { ...operation(), amountPaise: order.totalPaise - 100 }
-    const results = await Promise.all([
-      command(order.id, 'refunds', input),
-      command(order.id, 'refunds', { ...input, idempotencyKey: randomUUID() }),
-    ])
+    const inputs = [input, { ...input, idempotencyKey: randomUUID() }]
+    const results = await Promise.all(inputs.map((body) => command(order.id, 'refunds', body)))
     expect(results.map((r) => r.status).sort()).toEqual([202, 409])
-    expect((await command(order.id, 'refunds', input)).status).toBe(202)
+    const index = results.findIndex((response) => response.status === 202)
+    const winner = inputs[index],
+      loser = inputs[1 - index]
+    const replay = await command(order.id, 'refunds', winner)
+    expect(replay.status).toBe(202)
+    expect(replay.body.data).toEqual(results[index].body.data)
+    expect((await command(order.id, 'refunds', loser)).status).toBe(409)
     expect(await db.refundAttempt.count({ where: { payment: { orderId: order.id } } })).toBe(1)
     expect(await balances(order.id)).toEqual(before)
-    expect((await command(order.id, 'refunds', { ...input, amountPaise: 1 })).body.error.code).toBe(
-      'IDEMPOTENCY_CONFLICT',
-    )
+    expect(
+      (await command(order.id, 'refunds', { ...winner, amountPaise: 1 })).body.error.code,
+    ).toBe('IDEMPOTENCY_CONFLICT')
   })
   it('reconciles partial then full refunds without restocking or regressing shipped orders', async () => {
     const order = await shipped(),

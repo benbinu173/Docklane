@@ -6,7 +6,7 @@ Development, integration, and public-demo environments have separate data and cr
 
 Use Node 22 (at least 22.12) and `npm ci --include=dev` during deployment builds, so production mode still installs Prisma and TypeScript tooling. `npm run deploy:build:backend` generates Prisma and compiles shared packages, API, and worker. `npm run deploy:build:web` validates HTTPS frontend variables, compiles contracts, and builds/prerenders the web client. `npm run build` remains the local/CI full build.
 
-Run migrations through the direct connection before the API starts. Render's API `preDeployCommand` supplies this step. Review migrations for compatibility with the previous deployed code; a failed deployment may leave an applied migration. Avoid running worker processing before the initial schema is ready. Demo bootstrap follows migrations and precedes public sign-ins.
+Run migrations through the direct connection before the API starts. Render's API `preDeployCommand` supplies this step. Review migrations for compatibility with the previous deployed code; a failed deployment may leave an applied migration. Avoid running worker processing before the initial schema is ready. Demo Auth preparation uses `scripts/demo-auth.mjs` with its registered seed origin and a private checkpoint; its sessions are closed after verification. Database bootstrap follows migrations and precedes public sign-ins. Both use the demo target guards and require an explicitly enabled bootstrap flag.
 
 ## Recovery
 

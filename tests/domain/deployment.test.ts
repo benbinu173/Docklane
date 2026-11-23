@@ -30,11 +30,28 @@ describe('release environment boundaries', () => {
       expect(() => validateDeployment(environment(), target)).not.toThrow()
   })
   it('refuses the original development branch even when marked as a demo', () => {
+    for (const hostname of [
+      'ep-cool-waterfall-aolznx0k.ap-southeast-1.aws.neon.tech',
+      'ep-cool-waterfall-aolznx0k.c-2.ap-southeast-1.aws.neon.tech',
+    ]) {
+      const env = environment()
+      env.DEMO_DATABASE_HOST = hostname
+      env.DATABASE_URL = `postgresql://demo:private@${hostname}/docklane?sslmode=require`
+      env.DATABASE_URL_UNPOOLED = env.DATABASE_URL
+      expect(() => validateDeployment(env, 'bootstrap')).toThrow(/isolated demo/)
+    }
+  })
+  it('prepares demo data before hosting origins and payment keys exist', () => {
     const env = environment()
-    env.DEMO_DATABASE_HOST = 'ep-cool-waterfall-aolznx0k.ap-southeast-1.aws.neon.tech'
-    env.DATABASE_URL = `postgresql://demo:private@${env.DEMO_DATABASE_HOST}/docklane?sslmode=require`
-    env.DATABASE_URL_UNPOOLED = env.DATABASE_URL
-    expect(() => validateDeployment(env, 'bootstrap')).toThrow(/isolated demo/)
+    for (const key of [
+      'WEB_ORIGINS',
+      'CHECKOUT_RETURN_ORIGIN',
+      'STRIPE_SECRET_KEY',
+      'STRIPE_WEBHOOK_SECRET',
+    ])
+      delete env[key]
+    expect(() => validateDeployment(env, 'bootstrap')).not.toThrow()
+    expect(() => validateDeployment(env, 'api')).toThrow()
   })
   it('refuses pooled migration connections and mixed branch credentials', () => {
     const env = environment()

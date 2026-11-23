@@ -42,7 +42,8 @@
     "deploy:start:worker": "node scripts/check-deployment.mjs worker && npm run start --workspace @docklane/worker",
     "demo:bootstrap": "tsx scripts/demo-bootstrap.ts",
     "backup:rehearse": "node scripts/backup-rehearsal.mjs",
-    "capture:release": "node scripts/capture-release.mjs"
+    "capture:release": "node scripts/capture-release.mjs",
+    "demo:auth": "node scripts/demo-auth.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
