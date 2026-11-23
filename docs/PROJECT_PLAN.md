@@ -56,7 +56,7 @@ flowchart LR
 - Neon Auth as the planned identity provider. Verify credentials on the API and load application roles and account status server-side. Use supported session validation for mutations; if JWT verification is used, account for token expiry and revocation semantics.
 - Redis + BullMQ for job delivery; PostgreSQL outbox records preserve work when queue delivery or a process fails.
 - Docker Compose for local PostgreSQL and Redis. Use dedicated test databases for integration tests.
-- Planned hosting: Vercel for the web client, Render for API and worker, PostgreSQL on Neon, and a persistent Redis provider compatible with BullMQ. Confirm provider availability and cost before selecting paid plans during deployment.
+- Current hosting budget: ₹0. Use free Render static/API hosting and existing free Neon, with database recovery while awake and optional hourly GitHub maintenance. Keep the complete worker and Redis stack locally. Cold starts, quotas and delayed recovery are explicit demo limitations; no paid services are authorized.
 - When using hosted Neon databases, develop on an isolated development branch; keep deployment/demo data separate from test data.
 
 ### Proposed repository layout

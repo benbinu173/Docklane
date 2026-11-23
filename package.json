@@ -43,7 +43,9 @@
     "demo:bootstrap": "tsx scripts/demo-bootstrap.ts",
     "backup:rehearse": "node scripts/backup-rehearsal.mjs",
     "capture:release": "node scripts/capture-release.mjs",
-    "demo:auth": "node scripts/demo-auth.mjs"
+    "demo:auth": "node scripts/demo-auth.mjs",
+    "deploy:start:free-api": "npm run deploy:check:api && npm run db:migrate && npm run start --workspace @docklane/api",
+    "demo:maintenance": "node scripts/demo-maintenance.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

@@ -105,6 +105,10 @@ Phase 8 validation passed **139 distinct checks**: eight domain, 103 PostgreSQL/
 
 The [CI workflow](.github/workflows/ci.yml) configures PostgreSQL/Redis and runs formatting, linting, type checking, builds, domain/API tests, the concurrency script, and public/connected production browser tests. Live Auth checks stay outside ordinary CI. Phase 9 preparation resolves the Prisma/Effect advisory with compatible Effect 3.22.1 while retaining Prisma 7.10.1. A clean Linux install, valid dependency tree, deployment builds and full audit with zero findings passed; see [Phase 9 verification](docs/PHASE_9.md).
 
+## Free portfolio deployment
+
+The selected hosting budget is **₹0, with no payment method**. The free Render frontend/API and existing free Neon database/Auth retain the real order engine and Stripe test payments. PostgreSQL recovery runs while the API is awake; optional hourly GitHub maintenance starts disabled until deployment review. The complete Redis/BullMQ worker remains runnable locally. API cold starts, quota limits and delayed background processing are explicit demo limitations. See [free deployment setup](docs/DEPLOYMENT.md).
+
 ## Stack and documents
 
 React/Vite/TypeScript, Tailwind v4, customized shadcn/Radix, self-hosted Geist, Motion, Phosphor, TanStack Query/Table, Express, Zod, Prisma, PostgreSQL, Managed Neon Auth, Vitest, Playwright, and axe. The Phase 5 worker uses BullMQ and ioredis; Stripe test payments require configuration before a hosted purchase.

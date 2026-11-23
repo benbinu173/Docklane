@@ -64,8 +64,8 @@ export function assertDemoTarget(env, requireDirect = false) {
   return { pooled, direct }
 }
 export function validateDeployment(env, target) {
-  if (!['web', 'api', 'worker', 'bootstrap'].includes(target))
-    throw new Error('Choose web, api, worker, or bootstrap.')
+  if (!['web', 'api', 'worker', 'bootstrap', 'maintenance'].includes(target))
+    throw new Error('Choose web, api, worker, bootstrap, or maintenance.')
   if (target === 'web') {
     httpsUrl(env, 'VITE_API_URL', true)
     httpsUrl(env, 'VITE_NEON_AUTH_URL')

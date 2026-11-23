@@ -6,7 +6,7 @@ Development, integration, and public-demo environments have separate data and cr
 
 Use Node 22 (at least 22.12) and `npm ci --include=dev` during deployment builds, so production mode still installs Prisma and TypeScript tooling. `npm run deploy:build:backend` generates Prisma and compiles shared packages, API, and worker. `npm run deploy:build:web` validates HTTPS frontend variables, compiles contracts, and builds/prerenders the web client. `npm run build` remains the local/CI full build.
 
-Run migrations through the direct connection before the API starts. Render's API `preDeployCommand` supplies this step. Review migrations for compatibility with the previous deployed code; a failed deployment may leave an applied migration. Avoid running worker processing before the initial schema is ready. Demo Auth preparation uses `scripts/demo-auth.mjs` with its registered seed origin and a private checkpoint; its sessions are closed after verification. Database bootstrap follows migrations and precedes public sign-ins. Both use the demo target guards and require an explicitly enabled bootstrap flag.
+Run migrations through the direct connection before the API starts. The free API startup command validates configuration and applies migrations before listening. Review migrations for compatibility with the previous deployed code; a failed deployment may leave an applied migration. Avoid running worker processing before the initial schema is ready. Demo Auth preparation uses `scripts/demo-auth.mjs` with its registered seed origin and a private checkpoint; its sessions are closed after verification. Database bootstrap follows migrations and precedes public sign-ins. Both use the demo target guards and require an explicitly enabled bootstrap flag.
 
 ## Recovery
 
@@ -38,3 +38,7 @@ An in-place truncate/reset is deliberately absent. Re-running bootstrap refuses 
 ## Rollback
 
 Redeploy a previously verified code revision only after checking its compatibility with applied migrations. Keep workers aligned with API/schema versions. Do not treat a database restore as ordinary code rollback: it can lose post-backup orders while external payment state persists. Record the revision, migration state, backup target, and recovery outcomes when carrying out a reviewed rollback.
+
+## Free hosted recovery
+
+The free API uses `BACKGROUND_MODE=database` to process durable work while awake. Its one-minute loop shares PostgreSQL leases with optional hourly GitHub maintenance. Maintenance starts disabled; three batches and a five-minute timeout bound each run. API sleep and delayed schedules can postpone expiry/payment/refund processing. Restart recovery preserves stock correctness and provider idempotency. Local `npm run dev` still runs the full Redis/BullMQ worker. See [free deployment setup](DEPLOYMENT.md).

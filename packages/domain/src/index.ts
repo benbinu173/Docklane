@@ -12,6 +12,7 @@ export * from './payment-provider.js'
 export * from './stripe.js'
 export * from './fulfillment.js'
 export * from './refunds.js'
+export * from './recovery.js'
 
 export class DomainError extends Error {
   constructor(

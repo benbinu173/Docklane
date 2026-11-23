@@ -1,6 +1,6 @@
 # Docklane architecture
 
-Docklane is a TypeScript modular monolith with three deployed processes: React web, Express API, and a recovery worker. Shared domain code owns stock and order transitions. PostgreSQL owns the authoritative state; Redis delivers jobs and can be rebuilt from durable work.
+Docklane is a TypeScript modular monolith. The local stack has React web, Express API and a recovery worker. The free hosted demo uses web and API processes, with PostgreSQL recovery inside the awake API and optional hourly maintenance. Shared domain code owns stock and order transitions. PostgreSQL owns authoritative state; the local Redis queue can be rebuilt from durable work.
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,7 @@ Transactions write outbox records with their business change. The worker dispatc
 
 ## Deployment tradeoffs
 
-The prepared Render configuration uses one API process, one worker, persistent Redis with `noeviction`, and a static frontend. Vercel frontend configuration is also supplied. Singapore compute matches the existing Neon region. Provider selection, paid resources, and Blueprint application require review before launch; see [deployment preparation](DEPLOYMENT.md).
+The free hosted demo uses a static frontend and one sleeping API with PostgreSQL recovery and optional hourly GitHub maintenance. The complete local stack retains its separate BullMQ worker and persistent Docker Redis. Vercel frontend configuration is also supplied. Singapore compute matches the existing Neon region. Provider selection, paid resources, and Blueprint application require review before launch; see [deployment preparation](DEPLOYMENT.md).
 
 Rate limits are currently process-local: a second API replica needs a shared limiter. The first release supports one business and one warehouse per order. Carrier integration, split shipments, live payments, multi-currency, and tenancy are outside its scope. The worker's health endpoint checks database reachability and configured expiry processing; it is not a guarantee that Redis or Stripe is reachable.
 

@@ -20,6 +20,7 @@ const schema = z.object({
   WEB_ORIGINS: z.string().min(1).max(4096),
   BUSINESS_ID: z.string().min(1).max(80).default('northstar-supply'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'silent']).default('info'),
+  BACKGROUND_MODE: z.enum(['external', 'database']).default('external'),
   STRIPE_SECRET_KEY: z.string().startsWith('sk_test_').optional(),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_').optional(),
   CHECKOUT_RETURN_ORIGIN: z.url().optional(),

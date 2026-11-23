@@ -26,7 +26,7 @@ function environment(): NodeJS.ProcessEnv {
 }
 describe('release environment boundaries', () => {
   it('accepts coherent demo API/worker/bootstrap environments', () => {
-    for (const target of ['api', 'worker', 'bootstrap'])
+    for (const target of ['api', 'worker', 'bootstrap', 'maintenance'])
       expect(() => validateDeployment(environment(), target)).not.toThrow()
   })
   it('refuses the original development branch even when marked as a demo', () => {
@@ -79,6 +79,7 @@ describe('release environment boundaries', () => {
     expect(() => validateDeployment(env, 'bootstrap')).toThrow(/ALLOW_DEMO_BOOTSTRAP/)
     delete env.NODE_ENV
     expect(() => validateDeployment(env, 'worker')).toThrow(/production mode/)
+    expect(() => validateDeployment(env, 'maintenance')).toThrow(/production mode/)
   })
   it('rejects misdirected checkout and keeps credential values out of errors', () => {
     const env = environment()

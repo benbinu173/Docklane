@@ -1,4 +1,4 @@
-# Candidate deployment; creating/applying this Blueprint requires workspace and plan approval.
+# Zero-cost portfolio demo: free static site + free sleeping API. No paid worker or Redis.
 # External URLs are entered after Render assigns public domains. No string interpolation.
 services:
   - type: web
@@ -36,11 +36,10 @@ services:
     name: docklane-api
     runtime: node
     region: singapore
-    plan: 0.5c-512mb
+    plan: free
     numInstances: 1
     buildCommand: npm ci --include=dev && npm run deploy:build:backend
-    preDeployCommand: npm run deploy:check:api && npm run db:migrate
-    startCommand: npm run deploy:start:api
+    startCommand: npm run deploy:start:free-api
     healthCheckPath: /health/ready
     autoDeployTrigger: 'off'
     envVars:
@@ -68,55 +67,6 @@ services:
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
 
-  - type: worker
-    name: docklane-worker
-    runtime: node
-    region: singapore
-    plan: 0.5c-512mb
-    numInstances: 1
-    buildCommand: npm ci --include=dev && npm run deploy:build:backend
-    startCommand: npm run deploy:start:worker
-    autoDeployTrigger: 'off'
-    envVars:
-      - fromGroup: docklane-demo-settings
-      - key: WORKER_HOST
-        value: 127.0.0.1
-      - key: WORKER_PORT
-        value: '4010'
-      - key: DATABASE_URL
-        fromService:
-          type: web
-          name: docklane-api
-          envVarKey: DATABASE_URL
-      - key: DEMO_DATABASE_HOST
-        fromService:
-          type: web
-          name: docklane-api
-          envVarKey: DEMO_DATABASE_HOST
-      - key: STRIPE_SECRET_KEY
-        fromService:
-          type: web
-          name: docklane-api
-          envVarKey: STRIPE_SECRET_KEY
-      - key: STRIPE_WEBHOOK_SECRET
-        fromService:
-          type: web
-          name: docklane-api
-          envVarKey: STRIPE_WEBHOOK_SECRET
-      - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: docklane-queue
-          property: connectionString
-
-  - type: keyvalue
-    name: docklane-queue
-    region: singapore
-    plan: 256mb
-    maxmemoryPolicy: noeviction
-    persistenceMode: journal-snapshot
-    ipAllowList: []
-
 envVarGroups:
   - name: docklane-demo-settings
     envVars:
@@ -124,6 +74,8 @@ envVarGroups:
         value: '22'
       - key: NODE_ENV
         value: production
+      - key: BACKGROUND_MODE
+        value: database
       - key: BUSINESS_ID
         value: northstar-supply
       - key: ALLOW_DEVELOPMENT_SEED

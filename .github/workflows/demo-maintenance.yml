@@ -1,0 +1,34 @@
+name: Free demo maintenance
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: docklane-demo-maintenance
+  cancel-in-progress: false
+jobs:
+  recovery:
+    # Disabled until the reviewed demo is deployed and private secrets are configured.
+    if: vars.DOCKLANE_DEMO_MAINTENANCE == 'enabled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NODE_ENV: production
+      ALLOW_DEVELOPMENT_SEED: 'false'
+      BUSINESS_ID: northstar-supply
+      DEMO_DATABASE_HOST: ${{ vars.DOCKLANE_DEMO_DATABASE_HOST }}
+      DATABASE_URL: ${{ secrets.DOCKLANE_DEMO_DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DOCKLANE_DEMO_DATABASE_URL }}
+      STRIPE_SECRET_KEY: ${{ secrets.DOCKLANE_DEMO_STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.DOCKLANE_DEMO_STRIPE_WEBHOOK_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --include=dev
+      - run: npm run deploy:build:backend
+      - run: npm run demo:maintenance

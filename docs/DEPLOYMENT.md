@@ -1,52 +1,48 @@
-# Deployment preparation
+# Free demo deployment
 
-Status: the isolated Neon demo is initialized; the all-Render Blueprint exists, but its provider plan is awaiting workspace billing setup. No Render services or live demo URL have been created. The candidate [Render Blueprint](../infra/render.yaml) defines a static frontend, API, worker, and persistent Key Value queue. [Vercel configuration](../vercel.json) retains the originally planned frontend option.
+Status: the demo database/Auth are initialized. Hosting is prepared for review with a **₹0 budget and no payment method**. [The Render Blueprint](../infra/render.yaml) defines only a free static frontend and a free API. The previous paid worker/queue proposal is superseded.
 
-## Hosting choice and costs
+## Components and costs
 
-| Resource               | Candidate plan                        | Monthly baseline    |
-| ---------------------- | ------------------------------------- | ------------------- |
-| Render static frontend | Static site                           | $0                  |
-| Render API             | `0.5c-512mb`, one instance            | $7                  |
-| Render worker          | `0.5c-512mb`, one instance            | $7                  |
-| Render Key Value       | `256mb`, journal/snapshot persistence | $10                 |
-| Existing Neon project  | Current free plan, subject to quotas  | $0 within allowance |
+| Component               | Deployment                                                        | Service cost             |
+| ----------------------- | ----------------------------------------------------------------- | ------------------------ |
+| Frontend                | Render static site                                                | $0 within free quotas    |
+| API                     | Render Free web service                                           | $0 within free quotas    |
+| Database and Auth       | Existing Neon free project / isolated demo branch                 | $0 within free quotas    |
+| Recovery                | PostgreSQL outbox processed by the awake API                      | No separate paid service |
+| Idle-period maintenance | Optional standard GitHub Actions runner in this public repository | Free runner compute      |
+| Payments                | Existing Stripe sandbox and test cards                            | No real payment          |
 
-The backend baseline is **$24/month**, excluding extra usage, tax, and workspace charges. Prices and plan IDs were checked against [Render pricing](https://render.com/pricing) and [Blueprint reference](https://render.com/docs/blueprint-spec) on 20 November 2026. Free Key Value has no persistence; a free sleeping API is a weaker option for an interactive demo, and background workers need paid compute. The connected Render account lists **My Workspace** (`tea-cundai9opnds73d530i0`); the user confirmed this workspace and selected all-Render hosting on 23 November 2026, for planning only.
+Keep payment details off Render. Without a payment method, exceeding Render free allowances causes suspension or paused builds instead of an overage bill. Render instance hours are shared with this workspace's other projects. No compute or workspace upgrade is part of this demo.
 
-Use Render for the frontend if a single connected provider is preferred. To retain Vercel, omit the static service from the reviewed Blueprint and import the repository into Vercel with its repository root as the project root. Set both frontend variables there. Select one frontend before provisioning services and origins.
+## Free-host behavior
 
-## Isolated demo configuration
+Render Free APIs sleep after 15 minutes without inbound traffic and take about one minute to wake. The static product/sample UI remains independently available. Data and recovery work stay in Neon, so API restarts preserve authoritative orders, inventory and pending outbox records. Checkout remains transactionally guarded; sleep can delay reservation cleanup, confirmation and refunds.
 
-1. The `demo-phase-9` branch (`br-twilight-term-aorpkx3h`) was created on 23 November 2026 from the empty `main` branch in the existing `docklane` project. For another demo rotation, use the same empty-parent approach instead of copying `dev-phase-2`. The free account requires its default suspend settings. Do not copy development identities, orders, or balances.
-2. Enable Managed Neon Auth on the demo branch's `docklane` database. Obtain its Auth/JWKS URLs and direct/pooled connections. Keep them in ignored `.env.demo.local`; keep `.env.local` pointing at development.
-3. Copy [.env.demo.example](../.env.demo.example) to `.env.demo.local`. Set `DEMO_DATABASE_HOST` to the direct demo compute host. Fill the real assigned HTTPS origins when available. Auth and app data must use this same branch. Data/Auth bootstrap can run before hosting origins and Stripe keys are available; API deployment still requires them.
-4. Create fresh demo Auth identities for Admin, Operator, and Customer using `node --env-file=.env.demo.local scripts/demo-auth.mjs` with `ALLOW_DEMO_BOOTSTRAP=true` and a registered `DEMO_AUTH_SEED_ORIGIN`. The script checkpoints random passwords privately before signup, recovers a lost response through sign-in, verifies each login and closes its sessions. It refuses an account file from another branch. Keep credentials private. Save `{ "authUrl": "the demo Auth base URL", "accounts": [{ "authSubject": "provider user ID", "email": "matching email", "role": "ADMIN" }] }` to `.local/release/accounts.json`, with all three roles represented. The bootstrap verifies each subject/email against the demo's `neon_auth.user`; it uses provider-owned names.
-5. Migrate using `node --env-file=.env.demo.local scripts/database.mjs migrate`. With `ALLOW_DEMO_BOOTSTRAP=true`, review `node --env-file=.env.demo.local --import tsx scripts/demo-bootstrap.ts`, then run it with `--apply`. Disable the flag afterwards. The command creates catalog, warehouses, opening stock and staff profiles only. It refuses populated application tables and does not fabricate connected payment history.
+`BACKGROUND_MODE=database` starts a bounded PostgreSQL recovery loop at a one-minute interval while the API is awake. It shares the existing expiry, provider reconciliation, refund and lease logic. The dedicated Redis/BullMQ worker remains available for full local operation through Docker; hosted recovery has no separate Redis or worker service.
 
-The migration helper preserves explicitly supplied environment variables even though it also reads development dotenv defaults. Supply **both** database URLs from the demo environment. Runtime/deployment guards reject an inherited separate development Auth database.
+The optional [maintenance workflow](../.github/workflows/demo-maintenance.yml) checks work hourly without pinging the sleeping API. It is disabled until repository variable `DOCKLANE_DEMO_MAINTENANCE=enabled` is set after deployment review. GitHub schedules can be delayed or disabled after repository inactivity. This portfolio demo has delayed background recovery and no continuous-availability promise. That workflow uploads no artifacts.
 
-## Review and launch
+## Database and private setup
 
-The Render tools require a confirmed workspace before Blueprint planning, and explicit approval of the actual reviewed plan before application. Cost acceptance or supplying secrets does not itself authorize deployment.
+The `demo-phase-9` branch (`br-twilight-term-aorpkx3h`) was created from the empty main branch of the existing Docklane project. All six migrations and Managed Neon Auth are configured. Bootstrap contains eight products, three warehouses, 24 reconciled balances and three private role-specific accounts. The original development database and DL-10023 remain preserved.
 
-The initial Blueprint `exs-dc1s8hutlv9c73cvmplg` exists with zero resources and `autoSync: false`. Render returned `need_payment_info` before it could plan the paid services. In the [Render Dashboard](https://dashboard.render.com), select My Workspace, open Billing in the left pane, then complete Payment Method setup. Keep the current workspace plan; a plan upgrade is not required by this configuration. Retry `plan_blueprint` for the existing Blueprint afterwards. Billing setup enables planning and does not replace deployment approval. See [Render dashboard billing guidance](https://render.com/docs/render-dashboard#manage-billing).
+Use ignored `.env.demo.local` for credentials and `.local/release/accounts.json` for fresh accounts. Guarded Auth/bootstrap commands can prepare data before public hosting origins exist. Bootstrap stays disabled after setup. See [.env.demo.example](../.env.demo.example), [the demo guide](DEMO.md), and [operations](OPERATIONS.md).
 
-Push the validated repository and `infra/render.yaml` first. Create the Blueprint with `existingResources: create_new` and `autoSync: false`. Review its proposed resources, costs, required manual values, and dashboard link. Do not approve a failed plan. All service automatic deploy triggers are off during preparation, so a Git push alone does not launch or change infrastructure.
+## Review and release
 
-Manual values are collected through the private environment file/provider dashboard, never chat: API pooled/direct URLs, demo host, Auth/JWKS URLs, exact web/checkout origins, Stripe test keys; frontend API/Auth URLs. The worker references the API's shared configuration and the queue's internal connection string. Environment groups contain nonsecret constants only.
+My Workspace (`tea-cundai9opnds73d530i0`) is already confirmed. Existing Blueprint `exs-dc1s8hutlv9c73cvmplg` has no resources and automatic sync disabled. Push the free-only file, then use `plan_blueprint` for that Blueprint. The former `need_payment_info` error applied to the paid proposal; billing setup is no longer the selected path.
 
-Render assigns public domains during provisioning. `fromService.property: host` is a **private hostname**, not a public API URL; Blueprint values do not interpolate URLs. If assigned domains are unavailable in the initial plan, set final origins before the first successful startup and rebuild the frontend afterwards. Initial builds intentionally fail when required configuration is incomplete.
+Review the actual planned resources and $0 service plans. Render requires explicit approval of the reviewed plan before application. Confirming a free budget or supplying keys does not replace approval. No paid resources or billing updates are authorized.
 
-## Required hosted checks
+Render assigns public domains during provisioning. Set the assigned API URL and demo Auth URL on the frontend; set exact frontend/checkout origins and test Stripe credentials on the API. Enter values privately. Free APIs lack paid pre-deploy hooks, so `deploy:start:free-api` validates the environment and applies direct migrations before listening. Startup never runs a seed/reset.
 
-Before calling Phase 9 complete:
+Register the deployed `/api/v1/webhooks/stripe` destination in the existing Stripe sandbox and use that endpoint's signing secret. Add the selected frontend origin to demo Auth. Rebuild the frontend when its `VITE_*` URLs change. The `/welcome` rewrites precede the SPA fallback.
 
-- Add only the chosen frontend's HTTPS origin to demo Neon Auth trusted domains; configure recovery redirect and turn off demo localhost allowance after local verification. Test recovery with an actual deliverable email, including reset and restored login.
-- Run `npm run deploy:check:api` in the API environment. Verify `/health/live` and `/health/ready`, migrations, persisted roles, and customer ownership after a restart.
-- Register `${API_ORIGIN}/api/v1/webhooks/stripe` in the same Stripe sandbox as the demo test key. Subscribe to the events listed in [Phase 5](PHASE_5.md). Use this endpoint's signing secret, not the local Stripe CLI secret.
-- Complete a test customer checkout, confirm it through verified provider processing, then pack and ship as staff. Verify repeated shipment consumes stock once. Exercise a test refund and explicit received return/restock.
-- Verify expiry across worker restart, a late payment's compensation, signed webhook delivery/retry, and persistent queue recovery. Render background workers cannot use web-service health probes; check worker status/logs and its local health endpoint through a provider shell.
-- Record assigned URLs and dated results in [Phase 9](PHASE_9.md). Rebuild the web client whenever `VITE_*` variables change; they are build-time values.
+For optional maintenance, configure repository variable `DOCKLANE_DEMO_DATABASE_HOST` with the approved direct demo host, and private Actions secrets `DOCKLANE_DEMO_DATABASE_URL` (direct connection), `DOCKLANE_DEMO_STRIPE_SECRET_KEY`, and `DOCKLANE_DEMO_STRIPE_WEBHOOK_SECRET`. Enable the activation variable only after review. Its target guard refuses the original development compute. Use the standard Ubuntu runner.
 
-The `/welcome` and `/welcome/` rewrites must precede the SPA fallback so visitors receive the prerendered product page. Other direct links must load the application. Keep one API instance until shared rate-limit storage is implemented.
+## Completion evidence
+
+After approval, verify public direct links, Auth recovery with a deliverable email, test checkout/webhook confirmation, fulfillment/refund/return, API restart/wake and background recovery. Record delays and quotas accurately. Phase 9 remains in progress until hosted smoke checks pass; [the release record](PHASE_9.md) tracks them.
+
+Sources checked on 23 November 2026: [Render free hosting](https://render.com/docs/free) and [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).

@@ -17,6 +17,7 @@ import {
   cancelUnpaidOrder,
   DomainError,
   ProviderError,
+  createDatabaseRecoveryRuntime,
 } from '@docklane/domain'
 import { createApp } from '../../apps/api/src/app.js'
 import { createWorkerRuntime } from '../../apps/worker/src/runtime.js'
@@ -140,6 +141,94 @@ beforeEach(async () => {
 afterAll(async () => db.$disconnect())
 
 describe('Phase 5 payments and background recovery on PostgreSQL', () => {
+  it('releases expired holds through database recovery without Redis and coalesces overlapping ticks', async () => {
+    const order = await reserve()
+    await elapsed(order.id)
+    const physical = await db.inventoryBalance.findMany({
+      where: { reservations: { some: { orderId: order.id } } },
+      orderBy: { id: 'asc' },
+      select: { id: true, onHand: true },
+    })
+    const runtime = createDatabaseRecoveryRuntime(db, { businessId, autoStart: false })
+    try {
+      await Promise.all([runtime.tick(), runtime.tick(), runtime.tick()])
+      expect((await db.order.findUniqueOrThrow({ where: { id: order.id } })).orderStatus).toBe(
+        'EXPIRED',
+      )
+      expect(
+        await db.inventoryMovement.count({ where: { orderId: order.id, type: 'RELEASE' } }),
+      ).toBe(2)
+      expect(
+        await db.inventoryBalance.findMany({
+          where: { id: { in: physical.map((balance) => balance.id) } },
+          orderBy: { id: 'asc' },
+          select: { id: true, onHand: true },
+        }),
+      ).toEqual(physical)
+    } finally {
+      await runtime.close()
+    }
+    await runtime.tick()
+    expect(
+      await db.inventoryMovement.count({ where: { orderId: order.id, type: 'RELEASE' } }),
+    ).toBe(2)
+  })
+  it('reconciles a signed late capture and refunds it once across competing database recovery processes', async () => {
+    const order = await reserve(),
+      session = (await checkout(order.id)).body.data.sessionId
+    provider.pay(session)
+    await elapsed(order.id)
+    expect((await webhook(signedEvent(session))).status).toBe(200)
+    const first = createDatabaseRecoveryRuntime(db, { businessId, provider, autoStart: false })
+    const second = createDatabaseRecoveryRuntime(db, { businessId, provider, autoStart: false })
+    try {
+      await Promise.all([first.tick(), second.tick()])
+      await Promise.all([first.tick(), second.tick()])
+      expect(await db.order.findUniqueOrThrow({ where: { id: order.id } })).toMatchObject({
+        orderStatus: 'EXPIRED',
+        paymentStatus: 'REFUNDED',
+      })
+      expect(provider.refunds.size).toBe(1)
+      expect(
+        await db.refundAttempt.count({
+          where: { payment: { orderId: order.id }, status: 'SUCCEEDED' },
+        }),
+      ).toBe(1)
+      expect(
+        await db.inventoryMovement.count({ where: { orderId: order.id, type: 'RELEASE' } }),
+      ).toBe(2)
+    } finally {
+      await Promise.all([first.close(), second.close()])
+    }
+  })
+  it('leaves provider work pending when database recovery has no test payment credentials', async () => {
+    const order = await reserve()
+    await checkout(order.id)
+    const pending = await db.outboxEvent.findFirstOrThrow({
+      where: {
+        type: 'STRIPE_RECONCILE',
+        payload: {
+          path: ['paymentId'],
+          equals: (await db.payment.findUniqueOrThrow({ where: { orderId: order.id } })).id,
+        },
+      },
+    })
+    const runtime = createDatabaseRecoveryRuntime(db, { businessId, autoStart: false })
+    await db.outboxEvent.update({
+      where: { id: pending.id },
+      data: { availableAt: new Date(Date.now() - 1000) },
+    })
+    try {
+      await runtime.tick()
+    } finally {
+      await runtime.close()
+    }
+    expect(await db.outboxEvent.findUniqueOrThrow({ where: { id: pending.id } })).toMatchObject({
+      status: 'PENDING',
+      attempts: 0,
+      lastErrorCode: null,
+    })
+  })
   it('starts one server-priced provider session for concurrent retries and preserves frozen parameters', async () => {
     const order = await reserve(),
       responses = await Promise.all([checkout(order.id), checkout(order.id), checkout(order.id)])
