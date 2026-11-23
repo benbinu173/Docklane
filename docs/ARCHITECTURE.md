@@ -12,10 +12,11 @@ flowchart LR
   API --> DB
   API --> Stripe[Stripe test checkout]
   Stripe -->|Signed webhook| API
-  DB --> Worker[Outbox and recovery worker]
-  Worker <--> Queue[(Persistent Redis / BullMQ)]
-  Worker --> DB
-  Worker --> Stripe
+  API --> Recovery[Bounded recovery loop while awake]
+  Recovery <--> DB
+  Recovery --> Stripe
+  Maintenance[Optional hourly GitHub maintenance - disabled] -.-> DB
+  Maintenance -.-> Stripe
 ```
 
 ## Stock correctness
@@ -30,7 +31,7 @@ The [concurrency proof](CONCURRENCY_PROOF.md) uses ten units and fifty simultane
 
 Managed Neon Auth owns identities, recovery, and sessions. The API checks the provider JWT and an active provider session, then loads application-owned role, active status, business membership, and customer ownership. Browser-supplied roles are never authoritative. Self-registration grants Customer access. Only an Admin can grant staff access or initiate the protected refund operations.
 
-The demo has its own Neon branch and provider configuration when provisioned. App traffic uses the pooled database URL; migrations use the direct connection. The release validator refuses development's known compute, mixed branch URLs, insecure public origins, and live Stripe keys.
+The live demo has its own Neon branch and provider configuration. App traffic uses the pooled database URL; migrations use the direct connection. The release validator refuses development's known compute, mixed branch URLs, insecure public origins, and live Stripe keys.
 
 ## Payments and recovery
 
@@ -40,7 +41,7 @@ Transactions write outbox records with their business change. The worker dispatc
 
 ## Deployment tradeoffs
 
-The free hosted demo uses a static frontend and one sleeping API with PostgreSQL recovery and optional hourly GitHub maintenance. The complete local stack retains its separate BullMQ worker and persistent Docker Redis. Vercel frontend configuration is also supplied. Singapore compute matches the existing Neon region. Provider selection, paid resources, and Blueprint application require review before launch; see [deployment preparation](DEPLOYMENT.md).
+The approved free hosted demo uses a static frontend and one sleeping API with PostgreSQL recovery. Optional hourly GitHub maintenance is supplied but disabled. The complete local stack retains its separate BullMQ worker and persistent Docker Redis. Vercel frontend configuration is also supplied. Singapore compute matches the existing Neon region. See [the live deployment and free limits](DEPLOYMENT.md).
 
 Rate limits are currently process-local: a second API replica needs a shared limiter. The first release supports one business and one warehouse per order. Carrier integration, split shipments, live payments, multi-currency, and tenancy are outside its scope. The worker's health endpoint checks database reachability and configured expiry processing; it is not a guarantee that Redis or Stripe is reachable.
 
@@ -56,4 +57,4 @@ Rate limits are currently process-local: a second API replica needs a shared lim
 | `packages/domain`    | Stock, checkout, payment, fulfillment, refund and return transitions                      |
 | `scripts`            | Setup, proofs, benchmarks, guarded release and demo operations                            |
 
-Verification distinguishes local database behavior, simulated provider transport, historical sandbox checks, and future hosted smoke checks. Dated evidence is in the phase notes; [Phase 9](PHASE_9.md) tracks remaining hosted work.
+Verification distinguishes local database behavior, simulated provider transport, development sandbox checks, and the deployed demo. Dated evidence is in the phase notes; [Phase 9](PHASE_9.md) tracks completed and remaining hosted work.

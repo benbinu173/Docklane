@@ -10,8 +10,9 @@ A full-stack TypeScript application for multi-warehouse inventory, simultaneous 
 - Designed transactional inventory reservations and request idempotency; verified that fifty concurrent one-unit requests against ten units produce exactly ten successful reservations with no overselling.
 - Implemented durable PostgreSQL outbox processing, BullMQ jobs, expiry sweeps and provider reconciliation to recover payment/refund work across worker restarts and queue outages.
 - Created responsive staff/customer workflows with persisted Light/Dark/System themes, accessible keyboard interactions and reduced-motion animations; verified workflows using Playwright and PostgreSQL integration tests.
+- Deployed a free Render/Neon portfolio demo and verified real sandbox checkout, signed webhooks, fulfillment, partial/full refunds and account recovery on the hosted application.
 
-Use the bullets appropriate to the space available. Add a deployed-demo claim or link only after hosted smoke verification. Historical query/browser measurements are reproducible local results in [Phase 8](PHASE_8.md); do not present them as cloud throughput or current theme Lighthouse measurements.
+Use the bullets appropriate to the space available. The [free hosted demo](https://docklane-web-6rpd.onrender.com/welcome) is live; its hosted verification is recorded in [Phase 9](PHASE_9.md). Historical query/browser measurements are reproducible local results in [Phase 8](PHASE_8.md); do not present them as cloud throughput or current theme Lighthouse measurements.
 
 ## Interview explanation
 

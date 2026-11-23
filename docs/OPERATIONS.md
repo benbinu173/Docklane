@@ -42,3 +42,5 @@ Redeploy a previously verified code revision only after checking its compatibili
 ## Free hosted recovery
 
 The free API uses `BACKGROUND_MODE=database` to process durable work while awake. Its one-minute loop shares PostgreSQL leases with optional hourly GitHub maintenance. Maintenance starts disabled; three batches and a five-minute timeout bound each run. API sleep and delayed schedules can postpone expiry/payment/refund processing. Restart recovery preserves stock correctness and provider idempotency. Local `npm run dev` still runs the full Redis/BullMQ worker. See [free deployment setup](DEPLOYMENT.md).
+
+On 23 November 2026, an actual hosted API restart preserved an active customer session, 24 demo balances, shipment/refund history and a pending unpaid-order expiry job. That order subsequently expired at its normal 30-minute deadline with one release movement and one expiry audit. Its recovery jobs completed, reload showed the saved expiry state, and all demo balances reconciled with stock movements and active reservations. The original development environment stayed separate. See [the release evidence](PHASE_9.md).

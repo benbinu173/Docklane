@@ -1,6 +1,8 @@
 # Free demo deployment
 
-Status: the demo database/Auth are initialized. Hosting is prepared for review with a **₹0 budget and no payment method**. [The Render Blueprint](../infra/render.yaml) defines only a free static frontend and a free API. The previous paid worker/queue proposal is superseded.
+Status: **both services are live**, using the approved **₹0 setup with no payment method**. [The Render Blueprint](../infra/render.yaml) defines only a free static frontend and a free API. The previous paid worker/queue proposal is superseded.
+
+Product: [docklane-web-6rpd.onrender.com/welcome](https://docklane-web-6rpd.onrender.com/welcome). Sign-in: [docklane-web-6rpd.onrender.com/auth/sign-in](https://docklane-web-6rpd.onrender.com/auth/sign-in). API readiness: [docklane-api-6rpd.onrender.com/health/ready](https://docklane-api-6rpd.onrender.com/health/ready).
 
 ## Components and costs
 
@@ -29,20 +31,20 @@ The `demo-phase-9` branch (`br-twilight-term-aorpkx3h`) was created from the emp
 
 Use ignored `.env.demo.local` for credentials and `.local/release/accounts.json` for fresh accounts. Guarded Auth/bootstrap commands can prepare data before public hosting origins exist. Bootstrap stays disabled after setup. See [.env.demo.example](../.env.demo.example), [the demo guide](DEMO.md), and [operations](OPERATIONS.md).
 
-## Review and release
+## Approved release and configuration
 
-My Workspace (`tea-cundai9opnds73d530i0`) is already confirmed. Existing Blueprint `exs-dc1s8hutlv9c73cvmplg` has no resources and automatic sync disabled. Push the free-only file, then use `plan_blueprint` for that Blueprint. The former `need_payment_info` error applied to the paid proposal; billing setup is no longer the selected path.
+The user applied reviewed sync `exe-dc1svaajnfac739n3sn0` of Blueprint `exs-dc1s8hutlv9c73cvmplg` in My Workspace (`tea-cundai9opnds73d530i0`). It created `docklane-web-6rpd`, `docklane-api-6rpd` and their shared environment group. Render confirms the API plan is `free`; the frontend is a static site. The API uses source revision `1f06786413f9240cf48e95ad59185078c87a8842`; the frontend uses `861a69cedcbbb6712e3238b72c038841ec8ecc91` with the verified demo-label update. Automatic Blueprint sync and service Git deployment are disabled. The Blueprint's `paused` status represents automatic sync being off.
 
-Review the actual planned resources and $0 service plans. Render requires explicit approval of the reviewed plan before application. Confirming a free budget or supplying keys does not replace approval. No paid resources or billing updates are authorized.
+The approved free setup is already applied. Future infrastructure changes need review against the same ₹0 constraint; no paid resources or billing updates are authorized.
 
-Render assigns public domains during provisioning. Set the assigned API URL and demo Auth URL on the frontend; set exact frontend/checkout origins and test Stripe credentials on the API. Enter values privately. Free APIs lack paid pre-deploy hooks, so `deploy:start:free-api` validates the environment and applies direct migrations before listening. Startup never runs a seed/reset.
+Assigned API/Auth URLs, exact frontend/checkout origins, the demo database guard and Stripe test credentials are configured privately. Initial builds failed until these manual settings were supplied; the environment updates triggered successful deployments. Check for an existing deploy after an environment update before requesting another. Free APIs lack paid pre-deploy hooks, so `deploy:start:free-api` validates the environment and applies direct migrations before listening. Startup never runs a seed/reset.
 
-Register the deployed `/api/v1/webhooks/stripe` destination in the existing Stripe sandbox and use that endpoint's signing secret. Add the selected frontend origin to demo Auth. Rebuild the frontend when its `VITE_*` URLs change. The `/welcome` rewrites precede the SPA fallback.
+The deployed `https://docklane-api-6rpd.onrender.com/api/v1/webhooks/stripe` destination is registered in the existing Stripe sandbox with its own signing secret. The exact frontend origin is trusted by demo Auth. Rebuild the frontend when its `VITE_*` URLs change. The `/welcome` rewrites precede the SPA fallback.
 
 For optional maintenance, configure repository variable `DOCKLANE_DEMO_DATABASE_HOST` with the approved direct demo host, and private Actions secrets `DOCKLANE_DEMO_DATABASE_URL` (direct connection), `DOCKLANE_DEMO_STRIPE_SECRET_KEY`, and `DOCKLANE_DEMO_STRIPE_WEBHOOK_SECRET`. Enable the activation variable only after review. Its target guard refuses the original development compute. Use the standard Ubuntu runner.
 
 ## Completion evidence
 
-After approval, verify public direct links, Auth recovery with a deliverable email, test checkout/webhook confirmation, fulfillment/refund/return, API restart/wake and background recovery. Record delays and quotas accurately. Phase 9 remains in progress until hosted smoke checks pass; [the release record](PHASE_9.md) tracks them.
+Public product/sign-in routes, readiness, all three roles' login/reload/permissions/logout and user-authorized inbox/password recovery passed. Real sandbox checkout, signed webhook confirmation, packing/shipment, partial/full test refunds and explicit return/restocking also passed. A real API redeploy preserved its active session, all 24 stock balances, both test orders and the pending expiry job. The unpaid order then expired at its normal 30-minute deadline with one stock release, completed recovery work and zero ledger/reservation mismatches. Phase 9 is complete; [the release record](PHASE_9.md) distinguishes hosted results, CI coverage and free-host limitations.
 
 Sources checked on 23 November 2026: [Render free hosting](https://render.com/docs/free) and [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).

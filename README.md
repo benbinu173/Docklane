@@ -4,7 +4,9 @@
 
 Docklane is an order and inventory platform with a navy, mist, and lime visual identity. Its central engineering objective is preventing overselling when customers order simultaneously.
 
-**Phases 1-8 are complete; Phase 9 release preparation is underway.** Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. The connected operations overview adds explainable metrics, date/warehouse filters, personal saved views, and keyboard search. The release candidate now includes request protection, queue-disconnect recovery checks, connected workflows in CI, and measured query/frontend improvements. See [the build plan](docs/PROJECT_PLAN.md) and [Phase 8 delivery notes](docs/PHASE_8.md).
+**Phases 1-9 are complete; the verified free portfolio demo is live.** Open the [Docklane product page](https://docklane-web-6rpd.onrender.com/welcome), [sample workspace](https://docklane-web-6rpd.onrender.com), or [connected sign-in](https://docklane-web-6rpd.onrender.com/auth/sign-in). The free API can take about one minute to wake after idle.
+
+Docklane combines an interactive staff prototype with a real Express API, PostgreSQL, Managed Neon Auth, role checks, and saved orders. The connected order lifecycle includes stock reservations, Stripe test checkout and refunds, automatic expiry, packing and shipment, paid cancellation, received returns, explicit restocking, and background recovery. The connected operations overview adds explainable metrics, date/warehouse filters, personal saved views, and keyboard search. The release candidate includes request protection, queue-disconnect recovery checks, connected workflows in CI, and measured query/frontend improvements. See [the build plan](docs/PROJECT_PLAN.md), [Phase 8 delivery notes](docs/PHASE_8.md), and [the live release record](docs/PHASE_9.md).
 
 ## Open the current workspace
 
@@ -107,7 +109,7 @@ The [CI workflow](.github/workflows/ci.yml) configures PostgreSQL/Redis and runs
 
 ## Free portfolio deployment
 
-The selected hosting budget is **₹0, with no payment method**. The free Render frontend/API and existing free Neon database/Auth retain the real order engine and Stripe test payments. PostgreSQL recovery runs while the API is awake; optional hourly GitHub maintenance starts disabled until deployment review. The complete Redis/BullMQ worker remains runnable locally. API cold starts, quota limits and delayed background processing are explicit demo limitations. See [free deployment setup](docs/DEPLOYMENT.md).
+The selected hosting budget is **₹0, with no payment method**. The approved free Render frontend/API and existing free Neon database/Auth are live. Fresh reviewer credentials are in ignored `.local/release/accounts.json`, separate from development credentials. Hosted role-specific login/reload/permissions/logout, inbox/password recovery, sandbox checkout and signed webhooks, fulfillment/refunds/returns, API restart and natural reservation expiry passed. PostgreSQL recovery runs while the API is awake; optional hourly GitHub maintenance remains disabled. The complete Redis/BullMQ worker remains runnable locally. API cold starts, quota limits and delayed background processing are explicit demo limitations. See [free deployment setup](docs/DEPLOYMENT.md).
 
 ## Stack and documents
 
@@ -128,4 +130,4 @@ React/Vite/TypeScript, Tailwind v4, customized shadcn/Radix, self-hosted Geist, 
 - [Repeatable concurrency proof](docs/CONCURRENCY_PROOF.md)
 - [Asset sources](docs/ASSETS.md)
 
-Phase 9 is in progress. See [deployment preparation and costs](docs/DEPLOYMENT.md), [architecture](docs/ARCHITECTURE.md), [operations and backup/reset procedures](docs/OPERATIONS.md), [guided demo](docs/DEMO.md), and [portfolio bullets](docs/PORTFOLIO.md). Hosted links and smoke verification remain pending; follow the [Phase 9 record](docs/PHASE_9.md).
+Phase 9 is complete. See [live deployment and free limits](docs/DEPLOYMENT.md), [architecture](docs/ARCHITECTURE.md), [operations and backup/reset procedures](docs/OPERATIONS.md), [guided demo and hosted previews](docs/DEMO.md), and [portfolio bullets](docs/PORTFOLIO.md). The [Phase 9 record](docs/PHASE_9.md) documents the verified results and limitations.

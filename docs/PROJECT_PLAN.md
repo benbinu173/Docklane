@@ -2,7 +2,7 @@
 
 Created: 18 November 2026, Asia/Kolkata.
 
-Status: Phases 0-8 complete. Docklane is a verified release candidate. Phase 9 deployment, demo, and portfolio packaging is in progress; see [release preparation](PHASE_9.md).
+Status: Phases 0-9 complete. Docklane's first portfolio release is live on the verified ₹0 Render/Neon setup; see [the release record](PHASE_9.md).
 
 ## Product objective
 
@@ -319,11 +319,11 @@ Depends on: Phase 7. Output: a release candidate with evidence supporting its re
 
 ## Phase 9: Deployment, demo, and portfolio packaging
 
-Status: in progress. Hosting configuration, demo/bootstrap guards, release documentation and artifact tooling are prepared. Workspace/hosting approval and hosted verification remain pending; see [Phase 9](PHASE_9.md).
+Status: complete. The approved free Render/Neon deployment, role-specific sessions/permissions, inbox/password recovery, sandbox checkout/webhooks, fulfillment/refund/return, real API restart and natural expiry checks passed. Hosted previews, private walkthroughs and portfolio material are available; see [Phase 9](PHASE_9.md).
 
 Deliverables:
 
-- Deploy web, API, worker, PostgreSQL, and compatible persistent Redis with environment validation and health checks.
+- Deploy the static web client, free API and isolated Neon database/Auth with environment validation and health checks. Run PostgreSQL recovery in the awake API; retain the full Redis/BullMQ worker locally and optional disabled-by-default hourly maintenance. This follows the user's ₹0 hosting requirement.
 - Configure production/demo origins and test webhook URLs; verify actual account recovery and payment flows on deployed services.
 - Establish separate development/demo databases and a restricted, repeatable demo reset process.
 - Provide guided role-specific demo access; keep payment keys in test mode and identify demo information clearly.
@@ -335,7 +335,7 @@ Completion checks:
 
 - A visitor can open the landing page, use the demo, complete a test order, and inspect its fulfillment lifecycle.
 - Sessions, inventory, and orders behave correctly after service restarts or hosting sleep.
-- Signed webhooks reach the deployed API; the deployed worker processes expiry and refund work.
+- Signed webhooks reach the deployed API; its PostgreSQL recovery loop processes expiry and refund work.
 - Setup and verification instructions work from a fresh checkout.
 - Live links, screenshots, architecture explanation, and actual validation evidence are ready to share.
 
@@ -362,8 +362,8 @@ Complete a working vertical slice in each phase: UI, API/data behavior where rel
 
 Prioritize correctness for stock, money, and authorization. UI fixtures remain clearly identified until their backing features are complete. Extend scope after the first-release checks pass.
 
-## Next implementation task
+## Current release
 
-Phase 8 completes correctness, security, recovery, and measured performance verification. The next phase is Phase 9: deployment, a guided demo, and portfolio packaging. See [Phase 8](PHASE_8.md) for the verified release candidate and [Phase 9](#phase-9-deployment-demo-and-portfolio-packaging) for the remaining release work.
+Phase 9 completes deployment, the guided demo and portfolio packaging. See [Phase 8](PHASE_8.md) for correctness, security, recovery and local performance evidence, and [Phase 9](PHASE_9.md) for live access, hosted verification and free-host limits.
 
 The original sample adapter remains separately available on its existing routes. Connected operations use saved API data. The Neon development branch, stock balances, and original order DL-10023 are preserved. Deployment and portfolio packaging belong to Phase 9.
